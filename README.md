@@ -36,9 +36,9 @@ Make sure the following are installed on your system:
 
 To get started, clone this repository to your local machine using the following command:
 
-    ```shell
-        git clone https://github.com/Miceteas/football.git 
-    ```
+```
+    git clone https://github.com/Miceteas/football.git 
+```
 
 
 # Contribute 
