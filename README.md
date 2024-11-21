@@ -35,7 +35,10 @@ Make sure the following are installed on your system:
 ## Clone the repository
 
 To get started, clone this repository to your local machine using the following command:
-``` git clone https://github.com/Miceteas/football.git ```
+
+    ```shell
+        git clone https://github.com/Miceteas/football.git 
+    ```
 
 
 # Contribute 
@@ -46,11 +49,17 @@ Otherwise, you can open a terminal and:
 
 1. Fork the repository
 2. Create a new branch:
-```git checkout -b feature-name```
+    ```shell
+        git checkout -b feature-name
+    ```
 3. Make your changes and commit:
-```git commit -m "Description of changes"```
+    ```shell
+        git commit -m "Description of changes"
+    ```
 4. Push to your branch:
-```git push origin feature-name```
+    ```shell
+        git push origin feature-name
+    ```
 5. Open a pull request
 
 
