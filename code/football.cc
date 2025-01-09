@@ -108,7 +108,7 @@
 
 #define FOOTBALL_DATA_DIR "@FOOTBALL_DATA_DIR@"
 
-static constexpr float SPEED = 60.0f;
+static constexpr float SPEED = 100.0f;
 
 enum class Role {
     ATTACKER,
@@ -125,13 +125,25 @@ class Player : public gf::Entity {
     Role m_role;
     gf::Color4f m_color;
   public : 
-    Player(float stamina, float size, gf::Vector2f position, Role role, gf::Color4f color) {
-      m_stamina = stamina;
-      m_velocity = {0,0};
-      m_size = size;
-      m_position = position;
-      m_role = role;
+    Player(float stamina, float size, gf::Vector2f position, Role role, gf::Color4f color) 
+      : m_stamina(stamina)
+      , m_velocity({0,0})
+      , m_size(size)
+      , m_position(position)
+      , m_color(color)
+      , m_role(role)
+    {
+
     }
+
+      // Square(gf::Vector2f position, float size, gf::Color4f color)
+      // : m_position(position)
+      // , m_velocity(0, 0)
+      // , m_size(size)
+      // , m_color(color)
+      // {
+    
+      // }
 
     float getSize() {
       return m_size;
@@ -154,10 +166,8 @@ class Player : public gf::Entity {
       shape.setPosition(m_position);
       shape.setAnchor(gf::Anchor::TopLeft);
       shape.setOutlineThickness(0.5f);
-      // shape.setColor(m_color);
-      // shape.setOutlineColor(gf::Color::darker(m_color));
-      shape.setColor(gf::Color::Azure);
-      shape.setOutlineColor(gf::Color::darker(gf::Color::Azure));
+      shape.setColor(m_color);
+      shape.setOutlineColor(gf::Color::darker(m_color));
       target.draw(shape);
     }
 };
@@ -170,11 +180,14 @@ class Ball : public gf::Entity {
     gf::Color4f m_color;
     Player *belongsTo;
   public : 
-    Ball(float size, gf::Vector2f position, gf::Color4f color) {
-      m_velocity = {0,0};
-      m_size = size;
-      m_position = position;
-      belongsTo = nullptr;
+    Ball(float size, gf::Vector2f position, gf::Color4f color)
+      : m_velocity({0,0})
+      , m_size(size)
+      , m_position(position)
+      , m_color(color)
+      , belongsTo(nullptr)
+    {
+
     }
 
     gf::Vector2f getPosition() {
@@ -201,19 +214,17 @@ class Ball : public gf::Entity {
       belongsTo = nullptr;
     }
 
-    bool isLockedTo() {
-      return belongsTo != nullptr;
+    bool isLockedTo(Player *p) {
+      return belongsTo == p;
     }
 
     void render(gf::RenderTarget& target) {
       gf::CircleShape shape(m_size);
       shape.setPosition(m_position);
-      // shape.setColor(m_color);
-      shape.setColor(gf::Color::Rose);
+      shape.setColor(m_color);
       shape.setAnchor(gf::Anchor::TopLeft);
       shape.setOutlineThickness(0.5f);
-      // shape.setOutlineColor(gf::Color::lighter(m_color));
-      shape.setOutlineColor(gf::Color::lighter(gf::Color::Rose));
+      shape.setOutlineColor(gf::Color::lighter(m_color));
       target.draw(shape);
     }
 };
@@ -263,24 +274,26 @@ int main() {
 
   gf::Action leftAction("Left");
   leftAction.addScancodeKeyControl(gf::Scancode::A);
-  leftAction.addScancodeKeyControl(gf::Scancode::Q);
   leftAction.addScancodeKeyControl(gf::Scancode::Left);
+  leftAction.setContinuous();
   actions.addAction(leftAction);
 
   gf::Action rightAction("Right");
   rightAction.addScancodeKeyControl(gf::Scancode::D);
   rightAction.addScancodeKeyControl(gf::Scancode::Right);
+  rightAction.setContinuous();
   actions.addAction(rightAction);
 
   gf::Action upAction("Up");
   upAction.addScancodeKeyControl(gf::Scancode::W);
-  upAction.addScancodeKeyControl(gf::Scancode::Z);
   upAction.addScancodeKeyControl(gf::Scancode::Up);
+  upAction.setContinuous();
   actions.addAction(upAction);
 
   gf::Action downAction("Down");
   downAction.addScancodeKeyControl(gf::Scancode::S);
   downAction.addScancodeKeyControl(gf::Scancode::Down);
+  downAction.setContinuous();
   actions.addAction(downAction);
 
   gf::Action dropAction("Drop");
@@ -314,6 +327,8 @@ int main() {
   mainEntities.addEntity(ball);
   
   gf::Vector2f velocity(0.0f, 0.0f);
+
+  Player *mainPlayer = &player1;
 
   // main loop
 
@@ -365,61 +380,64 @@ int main() {
 
     if (switchAction.isActive()) {
       if (cam1) {
-        view.setCenter(player2.getPosition());
+        mainPlayer = &player2;
+        player1.setVelocity({0.0f, 0.0f});
       }else {
-        view.setCenter(player1.getPosition());
+        mainPlayer = &player1;
+        player2.setVelocity({0.0f, 0.0f});
       }
       cam1 = !cam1;
     }
 
-    gf::Time dt = clock.restart();
-    player1.setVelocity(velocity);
+    actions.reset();  
 
-    player1.update(dt.asSeconds());
+    gf::Time dt = clock.restart();
+    mainPlayer->setVelocity(velocity);
+
+    mainPlayer->update(dt.asSeconds());
     
-    gf::Vector2f player1Position = player1.getPosition();
+    gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
     gf::Vector2f ballPosition = ball.getPosition();
 
-    float player1Size = player1.getSize();
-    float ballSize = player1Size;
+    float mainPlayerSize = mainPlayer->getSize();
+    float ballSize = mainPlayerSize;
     
-    float player1Left = player1Position.x;
-    float player1Right = player1Position.x + player1Size;
-    float player1Top = player1Position.y;
-    float player1Bottom = player1Position.y + player1Size;
+    float mainPlayerLeft = mainPlayerPosition.x;
+    float mainPlayerRight = mainPlayerPosition.x + mainPlayerSize;
+    float mainPlayerTop = mainPlayerPosition.y;
+    float mainPlayerBottom = mainPlayerPosition.y + mainPlayerSize;
 
     float ballLeft = ballPosition.x;
-    float ballRight = ballPosition.x + ballSize; // Diamètre
+    float ballRight = ballPosition.x + ballSize;
     float ballTop = ballPosition.y;
-    float ballBottom = ballPosition.y + ballSize; // Diamètre
+    float ballBottom = ballPosition.y + ballSize;
 
-    bool isColliding = (player1Right > ballLeft && player1Left < ballRight &&
-                        player1Bottom > ballTop && player1Top < ballBottom);
+    bool isColliding = (mainPlayerRight > ballLeft && mainPlayerLeft < ballRight &&
+                        mainPlayerBottom > ballTop && mainPlayerTop < ballBottom);
 
     if (isColliding) {
-      ball.lockTo(&player1);
+      ball.lockTo(mainPlayer);
     }
 
-    if (ball.isLockedTo()) {
+    if (ball.isLockedTo(mainPlayer)) {
       ball.setVelocity(velocity);
     }else {
       ball.setVelocity({0.0f, 0.0f});
     }
 
     // mainEntities.update(dt);
-    player2.update(dt.asSeconds());
     ball.update(dt.asSeconds());
+
+    view.setCenter(mainPlayer->getPosition());
 
     // render
     renderer.clear();
-
-    view.move(velocity * dt.asSeconds());
 
     renderer.setView(view);
     ball.render(renderer);
     player1.render(renderer);
     player2.render(renderer);
-    // mainEntities.render(rend erer);
+    // mainEntities.render(renderer);
     renderer.display();
 
   }
@@ -428,3 +446,5 @@ int main() {
 }
 
 
+//Pas oublier une entité pour tous les joueurs pour les 2 équipes en même temps
+//
