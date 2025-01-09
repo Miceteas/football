@@ -13,6 +13,8 @@ find_package(gf REQUIRED)
 # Ajouter l'exécutable
 add_executable(football
   code/football.cc
+  code/ball.cc
+  code/player.cc
 )
 
 # Ajouter les répertoires pour inclure les headers

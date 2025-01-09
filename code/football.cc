@@ -1,64 +1,3 @@
-
-
-// float calculateDistance(float x, float y, float x2, float y2){
-//     return sqrt((x2 - x) * (x2 - x) + (y2 - y) * (y2 - y));
-// }
-
-// Player::Player(float stamina, float speed, float x, float y, Role role){
-//     this->stamina = stamina;
-//     this->speed = speed;
-//     this->x = x;
-//     this->y = y;
-//     this->role = role;
-// }
-
-// float Player::getStamina(){
-//     return this->stamina;
-// }
-
-// float Player::getSpeed(){
-//     return this->speed;
-// }
-
-// float Player::getX(){
-//     return this->x;
-// }
-
-// float Player::getY(){
-//     return this->y;
-// }
-
-// Role Player::getRole(){
-//     return this->role;
-// }
-
-// void Player::setStamina(float stamina){
-//     this->stamina = stamina;
-// }
-
-// void Player::setSpeed(float speed){
-//     this->speed = speed;
-// }
-
-// void Player::setX(float x){
-//     this->x = x;
-// }
-
-// void Player::setY(float y){
-//     this->y = y;
-// }
-
-// void Player::setRole(Role role){
-//     this->role = role;
-// }
-
-// void Player::move(float dx, float dy){
-//     this->x += dx;
-//     this->y += dy;
-// }
-
-// void Player::display(){}
-
 /*
  * Gamedev Framework (gf)
  * Copyright (C) 2016-2022 Julien Bernard
@@ -81,7 +20,6 @@
  */
 #include <cassert>
 #include <cstdio>
-
 #include <iostream>
 #include <string>
 #include <cmath>
@@ -98,136 +36,19 @@
 #include <gf/ViewContainer.h>
 #include <gf/Views.h>
 #include <gf/Window.h>
-
 #include <gf/Random.h>
 #include <gf/Shapes.h>
 #include <gf/Collision.h>
 #include <gf/Entity.h>
 
 #include "config.h"
+#include "ball.h"
+#include "player.h"
+#include "role.h"
 
 #define FOOTBALL_DATA_DIR "@FOOTBALL_DATA_DIR@"
 
 static constexpr float SPEED = 100.0f;
-
-enum class Role {
-    ATTACKER,
-    DEFENDER,
-    GOALKEEPER
-};
-
-class Player : public gf::Entity {
-  private:
-    float m_stamina; //Pas sûr pour le moment
-    gf::Vector2f m_velocity;
-    float m_size;
-    gf::Vector2f m_position;
-    Role m_role;
-    gf::Color4f m_color;
-  public : 
-    Player(float stamina, float size, gf::Vector2f position, Role role, gf::Color4f color) 
-      : m_stamina(stamina)
-      , m_velocity({0,0})
-      , m_size(size)
-      , m_position(position)
-      , m_color(color)
-      , m_role(role)
-    {
-
-    }
-
-      // Square(gf::Vector2f position, float size, gf::Color4f color)
-      // : m_position(position)
-      // , m_velocity(0, 0)
-      // , m_size(size)
-      // , m_color(color)
-      // {
-    
-      // }
-
-    float getSize() {
-      return m_size;
-    }
-
-    gf::Vector2f getPosition() {
-      return m_position;
-    }
-
-    void setVelocity(gf::Vector2f velocity) {
-      m_velocity = velocity;
-    }
-
-    void update(float dt) {
-      m_position += dt * m_velocity;
-    }
-
-    void render(gf::RenderTarget& target) {
-      gf::RectangleShape shape({m_size, m_size});
-      shape.setPosition(m_position);
-      shape.setAnchor(gf::Anchor::TopLeft);
-      shape.setOutlineThickness(0.5f);
-      shape.setColor(m_color);
-      shape.setOutlineColor(gf::Color::darker(m_color));
-      target.draw(shape);
-    }
-};
-
-class Ball : public gf::Entity {
-  private:
-    gf::Vector2f m_velocity;
-    float m_size;
-    gf::Vector2f m_position;
-    gf::Color4f m_color;
-    Player *belongsTo;
-  public : 
-    Ball(float size, gf::Vector2f position, gf::Color4f color)
-      : m_velocity({0,0})
-      , m_size(size)
-      , m_position(position)
-      , m_color(color)
-      , belongsTo(nullptr)
-    {
-
-    }
-
-    gf::Vector2f getPosition() {
-      return m_position;
-    }
-
-    float getSize() {
-      return m_size;
-    }
-
-    void setVelocity(gf::Vector2f velocity) {
-      m_velocity = velocity;
-    }
-
-    void update(float dt) {
-      m_position += dt * m_velocity;
-    }
-
-    void lockTo(Player *p) {
-      belongsTo = p;
-    }
-
-    void unlock() {
-      belongsTo = nullptr;
-    }
-
-    bool isLockedTo(Player *p) {
-      return belongsTo == p;
-    }
-
-    void render(gf::RenderTarget& target) {
-      gf::CircleShape shape(m_size);
-      shape.setPosition(m_position);
-      shape.setColor(m_color);
-      shape.setAnchor(gf::Anchor::TopLeft);
-      shape.setOutlineThickness(0.5f);
-      shape.setOutlineColor(gf::Color::lighter(m_color));
-      target.draw(shape);
-    }
-};
 
 int main() {
   static constexpr gf::Vector2u ScreenSize(500, 500);
