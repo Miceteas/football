@@ -63,5 +63,13 @@ Otherwise, you can open a terminal and:
 5. Open a pull request
 
 
+# Sources
+For the assets: 
+https://kenney.nl/assets/sports-pack
+
+GameDev Framework: 
+https://gamedevframework.github.io/v1.2.0/build_and_install.html
+
+
 # Supervision
 This project is supervised by **Julien Bernard**, Associate Professor at the Université de Franche-Comté.
