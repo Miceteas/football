@@ -39,6 +39,10 @@
 #include <gf/Shapes.h>
 #include <gf/Collision.h>
 #include <gf/Entity.h>
+#include <gf/SpriteBatch.h>
+#include <gf/Sprite.h>
+#include <gf/Texture.h>
+#include <gf/Image.h>
 #include <cmath>
 
 #include "config.h"
@@ -51,7 +55,7 @@
 static constexpr float SPEED = 100.0f;
 
 int main() {
-  static constexpr gf::Vector2u ScreenSize(500, 500);
+  static constexpr gf::Vector2u ScreenSize(500, 800);
 
   gf::Log::setLevel(gf::Log::Info);
 
@@ -59,6 +63,7 @@ int main() {
 
   gf::ResourceManager resourceManager;
   resourceManager.addSearchDir(FOOTBALL_DATA_DIR);
+  //resourceManager.addSearchDir("./assets");
 
   gf::Random random;
 
@@ -134,7 +139,26 @@ int main() {
 
   gf::EntityContainer mainEntities;
 
-  renderer.clear(gf::Color::fromRgba32(0x7CFC00FF));
+  //renderer.clear(gf::Color::fromRgba32(39, 98, 32, 128)); // rgba(39, 98, 32, 0.8)
+
+  gf::Texture grassTexture("../assets/Tilesheet/groundGrass.png");
+
+  gf::Sprite sprite;
+  gf::Vector2u windowSize = window.getSize();
+
+
+  sprite.setTexture(grassTexture);
+
+  gf::Vector2f scale(
+    float(windowSize.x) / grassTexture.getSize().x,
+    float(windowSize.y) / grassTexture.getSize().y
+  );
+  
+  sprite.setScale(scale);
+  sprite.setPosition({0.0f, 0.0f});
+
+
+  renderer.draw(sprite);
   
 
   gf::Clock clock;
@@ -266,6 +290,8 @@ view.setCenter(mainPlayer->getPosition());
 
     // render
     renderer.clear();
+
+    renderer.draw(sprite);
 
     renderer.setView(view);
     ball.render(renderer);
