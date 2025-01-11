@@ -1,5 +1,4 @@
-/*
- * Gamedev Framework (gf)
+/* Gamedev Framework (gf)
  * Copyright (C) 2016-2022 Julien Bernard
  *
  * This software is provided 'as-is', without any express or implied
@@ -40,6 +39,7 @@
 #include <gf/Shapes.h>
 #include <gf/Collision.h>
 #include <gf/Entity.h>
+#include <cmath>
 
 #include "config.h"
 #include "ball.h"
@@ -125,6 +125,11 @@ int main() {
   switchAction.addScancodeKeyControl(gf::Scancode::C);
   actions.addAction(switchAction);
 
+  gf::Action passAction("Pass");
+  passAction.addScancodeKeyControl(gf::Scancode::V); 
+  actions.addAction(passAction);
+
+
   // add entities
 
   gf::EntityContainer mainEntities;
@@ -195,61 +200,69 @@ int main() {
 
     // update
 
-    if (dropAction.isActive()) {
-      ball.unlock();
-    }
+if (dropAction.isActive()) {
+    ball.unlock();
+}
 
-    if (switchAction.isActive()) {
-      if (cam1) {
+if (ball.isLockedTo(mainPlayer)) {
+  if (passAction.isActive()) {
+    ball.unlock(); 
+    gf::Vector2f passDirection = {300.0f, 0.0f};
+    ball.setVelocity(passDirection);
+  }
+}
+
+if (switchAction.isActive()) {
+    if (cam1) {
         mainPlayer = &player2;
         player1.setVelocity({0.0f, 0.0f});
-      }else {
+    } else {
         mainPlayer = &player1;
         player2.setVelocity({0.0f, 0.0f});
-      }
-      cam1 = !cam1;
     }
+    cam1 = !cam1;
+}
 
-    actions.reset();  
+actions.reset();
 
-    gf::Time dt = clock.restart();
-    mainPlayer->setVelocity(velocity);
+gf::Time dt = clock.restart();
+mainPlayer->setVelocity(velocity);
 
-    mainPlayer->update(dt.asSeconds());
-    
-    gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
-    gf::Vector2f ballPosition = ball.getPosition();
+mainPlayer->update(dt.asSeconds());
 
-    float mainPlayerSize = mainPlayer->getSize();
-    float ballSize = mainPlayerSize;
-    
-    float mainPlayerLeft = mainPlayerPosition.x;
-    float mainPlayerRight = mainPlayerPosition.x + mainPlayerSize;
-    float mainPlayerTop = mainPlayerPosition.y;
-    float mainPlayerBottom = mainPlayerPosition.y + mainPlayerSize;
+gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
+gf::Vector2f ballPosition = ball.getPosition();
 
-    float ballLeft = ballPosition.x;
-    float ballRight = ballPosition.x + ballSize;
-    float ballTop = ballPosition.y;
-    float ballBottom = ballPosition.y + ballSize;
+float mainPlayerSize = mainPlayer->getSize();
+float ballSize = mainPlayerSize;
 
-    bool isColliding = (mainPlayerRight > ballLeft && mainPlayerLeft < ballRight &&
-                        mainPlayerBottom > ballTop && mainPlayerTop < ballBottom);
+float mainPlayerLeft = mainPlayerPosition.x;
+float mainPlayerRight = mainPlayerPosition.x + mainPlayerSize;
+float mainPlayerTop = mainPlayerPosition.y;
+float mainPlayerBottom = mainPlayerPosition.y + mainPlayerSize;
 
-    if (isColliding) {
-      ball.lockTo(mainPlayer);
-    }
+float ballLeft = ballPosition.x;
+float ballRight = ballPosition.x + ballSize;
+float ballTop = ballPosition.y;
+float ballBottom = ballPosition.y + ballSize;
 
-    if (ball.isLockedTo(mainPlayer)) {
-      ball.setVelocity(velocity);
-    }else {
-      ball.setVelocity({0.0f, 0.0f});
-    }
+bool isColliding = (mainPlayerRight > ballLeft && mainPlayerLeft < ballRight &&
+                    mainPlayerBottom > ballTop && mainPlayerTop < ballBottom);
 
-    // mainEntities.update(dt);
-    ball.update(dt.asSeconds());
+if (isColliding) {
+    ball.lockTo(mainPlayer);
+}
 
-    view.setCenter(mainPlayer->getPosition());
+if (ball.isLockedTo(mainPlayer)) {
+    ball.setVelocity(velocity);
+} else {
+    ball.setVelocity(ball.getVelocity());
+}
+
+ball.update(dt.asSeconds());
+
+view.setCenter(mainPlayer->getPosition());
+
 
     // render
     renderer.clear();

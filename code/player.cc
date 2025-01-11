@@ -6,7 +6,7 @@ Player::Player(float stamina, float size, gf::Vector2f position, Role role, gf::
 , m_size(size)
 , m_position(position)
 , m_color(color)
-, m_role(role) 
+, m_role(role)
 {
     
 }

@@ -15,12 +15,14 @@ class Ball : public gf::Entity {
     gf::Vector2f m_position;
     gf::Color4f m_color;
     Player *belongsTo;
+    bool m_isLocked; 
 
   public:
     Ball(float size, gf::Vector2f position, gf::Color4f color);
 
     gf::Vector2f getPosition() const;
     float getSize() const;
+    gf::Vector2f getVelocity() const; // Déplacé ici pour être public
 
     void setVelocity(gf::Vector2f velocity);
     void update(float dt);

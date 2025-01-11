@@ -5,9 +5,8 @@ Ball::Ball(float size, gf::Vector2f position, gf::Color4f color)
 , m_size(size)
 , m_position(position)
 , m_color(color)
-, belongsTo(nullptr) 
+, belongsTo(nullptr)
 {
-    
 }
 
 gf::Vector2f Ball::getPosition() const {
@@ -21,10 +20,38 @@ float Ball::getSize() const {
 void Ball::setVelocity(gf::Vector2f velocity) {
     m_velocity = velocity;
 }
+/*
+void Ball::update(float dt) {
+    m_position += m_velocity * dt;
+
+}*/
+
 
 void Ball::update(float dt) {
-    m_position += dt * m_velocity;
+    static constexpr float friction = 150.0f;
+    float speed = std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y);
+
+    if (std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y) < 0.1f) {
+        m_velocity = {0.0f, 0.0f};
+    }
+    if (speed > 0.001f) {
+        float deceleration = friction * dt;
+        speed = std::max(speed - deceleration, 0.0f);
+        
+        if (speed > 0.0f) {
+            m_velocity = m_velocity / std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y) * speed;
+        } else {
+            m_velocity = {0.0f, 0.0f};
+        }
+    } else {
+        m_velocity = {0.0f, 0.0f};
+    }
+
+    m_position += m_velocity * dt;
 }
+
+
+
 
 void Ball::lockTo(Player *p) {
     belongsTo = p;
@@ -36,6 +63,10 @@ void Ball::unlock() {
 
 bool Ball::isLockedTo(Player *p) const {
     return belongsTo == p;
+}
+
+gf::Vector2f Ball::getVelocity() const {
+    return m_velocity;
 }
 
 void Ball::render(gf::RenderTarget& target) {
