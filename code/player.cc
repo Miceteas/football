@@ -23,6 +23,10 @@ void Player::setVelocity(gf::Vector2f velocity) {
     m_velocity = velocity;
 }
 
+void Player::setPosition(gf::Vector2f position) {
+    m_position = position;
+}
+
 void Player::update(float dt) {
     m_position += dt * m_velocity;
 }

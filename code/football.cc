@@ -1,22 +1,3 @@
-/* Gamedev Framework (gf)
- * Copyright (C) 2016-2022 Julien Bernard
- *
- * This software is provided 'as-is', without any express or implied
- * warranty.  In no event will the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software
- *    in a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
- */
 #include <cassert>
 #include <cstdio>
 #include <iostream>
@@ -49,9 +30,11 @@
 #include "ball.h"
 #include "player.h"
 #include "role.h"
+#include "team.h"
 
 #define FOOTBALL_DATA_DIR "@FOOTBALL_DATA_DIR@"
 
+// constants
 static constexpr float SPEED = 100.0f;
 
 int main() {
@@ -60,7 +43,6 @@ int main() {
   gf::Log::setLevel(gf::Log::Info);
 
   // setup resource directory
-
   gf::ResourceManager resourceManager;
   resourceManager.addSearchDir(FOOTBALL_DATA_DIR);
   //resourceManager.addSearchDir("./assets");
@@ -68,25 +50,21 @@ int main() {
   gf::Random random;
 
   // initialize window
-
   gf::Window window("gf football", ScreenSize, ~gf::WindowHints::Resizable);
   window.setVerticalSyncEnabled(true);
   window.setFramerateLimit(60);
 
   gf::RenderWindow renderer(window);
 
+  gf::Vector2u windowSize = window.getSize();
+
   // add cameras
-
   gf::ViewContainer views;
-
-  gf::ExtendView view({0.0f, 20.0f}, {500.0f, 500.0f});
-
+  gf::ExtendView view({0.0f, 20.0f}, {float(window.getSize().x), float(window.getSize().y)});
   views.addView(view);
-
-  views.setInitialFramebufferSize(ScreenSize);
+  views.setInitialFramebufferSize(window.getSize());
 
   // add actions
-
   gf::ActionContainer actions;
 
   gf::Action closeWindowAction("Close window");
@@ -134,56 +112,49 @@ int main() {
   passAction.addScancodeKeyControl(gf::Scancode::V); 
   actions.addAction(passAction);
 
-
   // add entities
-
   gf::EntityContainer mainEntities;
 
-  //renderer.clear(gf::Color::fromRgba32(39, 98, 32, 128)); // rgba(39, 98, 32, 0.8)
-
   gf::Texture grassTexture("../assets/Tilesheet/groundGrass.png");
-
   gf::Sprite sprite;
-  gf::Vector2u windowSize = window.getSize();
-
 
   sprite.setTexture(grassTexture);
 
   gf::Vector2f scale(
-    float(windowSize.x) / grassTexture.getSize().x,
-    float(windowSize.y) / grassTexture.getSize().y
+    float(window.getSize().x) / grassTexture.getSize().x,
+    float(window.getSize().y) / grassTexture.getSize().y
   );
   
   sprite.setScale(scale);
-  sprite.setPosition({0.0f, 0.0f});
+  sprite.setPosition({0.0f, float(window.getSize().x)});
 
-
-  renderer.draw(sprite);
-  
+  //renderer.draw(sprite);
 
   gf::Clock clock;
   bool fullscreen = false;
 
-  Player player1(100.0f, 20.0f, {0.0f, 20.0f}, Role::ATTACKER, gf::Color::Azure);
+  // Initialize a team with 11 players
+  Team team("Team A", gf::Color::Azure);
+  team.initPlayers();  // Initialize the players
 
-  mainEntities.addEntity(player1);
+  // default setup
+  team.setupPlayers(window.getSize().x,window.getSize().y);
 
-  Player player2(100.0f, 20.0f, {400.0f, 20.0f}, Role::ATTACKER, gf::Color::Red);
-
-  mainEntities.addEntity(player2);
+  // Add team players to the mainEntities
+  
+  for (Player* player : team.getPlayers()) {
+    mainEntities.addEntity(*player);
+  }
 
   Ball ball(10.0f, {200.0f, 20.0f}, gf::Color::Rose);
-
   mainEntities.addEntity(ball);
   
   gf::Vector2f velocity(0.0f, 0.0f);
 
-  Player *mainPlayer = &player1;
+  Player* mainPlayer = team.getPlayers()[10]; 
 
   // main loop
-
   bool cam1 = true;
-
   while (window.isOpen()) {
     // input
     gf::Event event;
@@ -204,7 +175,7 @@ int main() {
 
     if ((leftAction.isActive() && rightAction.isActive()) || (!leftAction.isActive() && !rightAction.isActive())) {
       velocity.x = 0;
-    }else {
+    } else {
       if (leftAction.isActive()) {
         velocity.x = -SPEED;
       } else if (rightAction.isActive()) {
@@ -214,7 +185,7 @@ int main() {
 
     if ((upAction.isActive() && downAction.isActive()) || (!upAction.isActive() && !downAction.isActive())) {
       velocity.y = 0;
-    }else {
+    } else {
       if (upAction.isActive()) {
         velocity.y = -SPEED;
       } else if (downAction.isActive()) {
@@ -223,88 +194,81 @@ int main() {
     }
 
     // update
-
-if (dropAction.isActive()) {
-    ball.unlock();
-}
-
-if (ball.isLockedTo(mainPlayer)) {
-  if (passAction.isActive()) {
-    ball.unlock(); 
-    gf::Vector2f passDirection = {300.0f, 0.0f};
-    ball.setVelocity(passDirection);
-  }
-}
-
-if (switchAction.isActive()) {
-    if (cam1) {
-        mainPlayer = &player2;
-        player1.setVelocity({0.0f, 0.0f});
-    } else {
-        mainPlayer = &player1;
-        player2.setVelocity({0.0f, 0.0f});
+    if (dropAction.isActive()) {
+      ball.unlock();
     }
-    cam1 = !cam1;
-}
 
-actions.reset();
+    if (ball.isLockedTo(mainPlayer)) {
+      if (passAction.isActive()) {
+        ball.unlock(); 
+        gf::Vector2f passDirection = {300.0f, 0.0f};
+        ball.setVelocity(passDirection);
+      }
+    }
 
-gf::Time dt = clock.restart();
-mainPlayer->setVelocity(velocity);
+    if (switchAction.isActive()) {
+      // Switch main player between two players => to change
+      if (cam1) {
+        mainPlayer = team.getPlayers()[0];  
+      } else {
+        mainPlayer = team.getPlayers()[10]; 
+      }
+      cam1 = !cam1;
+    }
 
-mainPlayer->update(dt.asSeconds());
+    actions.reset();
 
-gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
-gf::Vector2f ballPosition = ball.getPosition();
+    gf::Time dt = clock.restart();
+    mainPlayer->setVelocity(velocity);
 
-float mainPlayerSize = mainPlayer->getSize();
-float ballSize = mainPlayerSize;
+    mainPlayer->update(dt.asSeconds());
 
-float mainPlayerLeft = mainPlayerPosition.x;
-float mainPlayerRight = mainPlayerPosition.x + mainPlayerSize;
-float mainPlayerTop = mainPlayerPosition.y;
-float mainPlayerBottom = mainPlayerPosition.y + mainPlayerSize;
+    gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
+    gf::Vector2f ballPosition = ball.getPosition();
 
-float ballLeft = ballPosition.x;
-float ballRight = ballPosition.x + ballSize;
-float ballTop = ballPosition.y;
-float ballBottom = ballPosition.y + ballSize;
+    float mainPlayerSize = mainPlayer->getSize();
+    float ballSize = mainPlayerSize;
 
-bool isColliding = (mainPlayerRight > ballLeft && mainPlayerLeft < ballRight &&
-                    mainPlayerBottom > ballTop && mainPlayerTop < ballBottom);
+    float mainPlayerLeft = mainPlayerPosition.x;
+    float mainPlayerRight = mainPlayerPosition.x + mainPlayerSize;
+    float mainPlayerTop = mainPlayerPosition.y;
+    float mainPlayerBottom = mainPlayerPosition.y + mainPlayerSize;
 
-if (isColliding) {
-    ball.lockTo(mainPlayer);
-}
+    float ballLeft = ballPosition.x;
+    float ballRight = ballPosition.x + ballSize;
+    float ballTop = ballPosition.y;
+    float ballBottom = ballPosition.y + ballSize;
 
-if (ball.isLockedTo(mainPlayer)) {
-    ball.setVelocity(velocity);
-} else {
-    ball.setVelocity(ball.getVelocity());
-}
+    bool isColliding = (mainPlayerRight > ballLeft && mainPlayerLeft < ballRight &&
+                        mainPlayerBottom > ballTop && mainPlayerTop < ballBottom);
 
-ball.update(dt.asSeconds());
+    if (isColliding) {
+      ball.lockTo(mainPlayer);
+    }
 
-view.setCenter(mainPlayer->getPosition());
+    if (ball.isLockedTo(mainPlayer)) {
+      ball.setVelocity(velocity);
+    } else {
+      ball.setVelocity(ball.getVelocity());
+    }
 
+    ball.update(dt.asSeconds());
 
+    view.setCenter(mainPlayer->getPosition());
+    
     // render
     renderer.clear();
-
-    renderer.draw(sprite);
-
+    //renderer.draw(sprite);
     renderer.setView(view);
-    ball.render(renderer);
-    player1.render(renderer);
-    player2.render(renderer);
-    // mainEntities.render(renderer);
-    renderer.display();
 
+    ball.render(renderer);
+
+    for (Player* player : team.getPlayers()) {
+      player->render(renderer);
+    }
+
+    renderer.display();
   }
 
   return 0;
 }
-
-
-//Pas oublier une entité pour tous les joueurs pour les 2 équipes en même temps
-//
