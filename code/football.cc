@@ -198,12 +198,9 @@ int main() {
       ball.unlock();
     }
 
-    if (ball.isLockedTo(mainPlayer)) {
-      if (passAction.isActive()) {
-        ball.unlock(); 
-        gf::Vector2f passDirection = {300.0f, 0.0f};
-        ball.setVelocity(passDirection);
-      }
+    if (ball.isLockedTo(mainPlayer) && passAction.isActive()) {
+      ball.unlock(); 
+      ball.setVelocity(mainPlayer->getPassVelocity());
     }
 
     if (switchAction.isActive()) {

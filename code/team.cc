@@ -39,17 +39,17 @@ void Team::showBenchPlayers(gf::RenderTarget& target) {
 }
 
 void Team::initPlayers() {
-    players.push_back(new Player(100.0f, 20.0f, gf::Vector2f(0.0f, 0.0f), Role::GOALKEEPER, color));
-    players.push_back(new Player(90.0f, 20.0f, gf::Vector2f(10.0f, 20.0f), Role::DEFENDER, color));
-    players.push_back(new Player(90.0f, 20.0f, gf::Vector2f(20.0f, 20.0f), Role::DEFENDER, color));
-    players.push_back(new Player(90.0f, 20.0f, gf::Vector2f(30.0f, 20.0f), Role::DEFENDER, color));  
-    players.push_back(new Player(90.0f, 20.0f, gf::Vector2f(40.0f, 20.0f), Role::DEFENDER, color));   
-    players.push_back(new Player(85.0f, 20.0f, gf::Vector2f(50.0f, 30.0f), Role::DEFENDER, color));
-    players.push_back(new Player(85.0f, 20.0f, gf::Vector2f(60.0f, 30.0f), Role::MIDFIELDER, color)); 
-    players.push_back(new Player(85.0f, 20.0f, gf::Vector2f(70.0f, 30.0f), Role::MIDFIELDER, color)); 
-    players.push_back(new Player(85.0f, 20.0f, gf::Vector2f(80.0f, 30.0f), Role::MIDFIELDER, color)); 
-    players.push_back(new Player(80.0f, 20.0f, gf::Vector2f(90.0f, 40.0f), Role::ATTACKER, color));  
-    players.push_back(new Player(80.0f, 20.0f, gf::Vector2f(100.0f, 40.0f), Role::ATTACKER, color));  
+    players.push_back(new Player(100.0f, 20.0f, gf::Vector2f(0.0f, 0.0f), Role::GOALKEEPER, color, M_PI*3/2));
+    players.push_back(new Player(90.0f, 20.0f, gf::Vector2f(10.0f, 20.0f), Role::DEFENDER, color, M_PI*3/2));
+    players.push_back(new Player(90.0f, 20.0f, gf::Vector2f(20.0f, 20.0f), Role::DEFENDER, color, M_PI*3/2));
+    players.push_back(new Player(90.0f, 20.0f, gf::Vector2f(30.0f, 20.0f), Role::DEFENDER, color, M_PI*3/2));
+    players.push_back(new Player(90.0f, 20.0f, gf::Vector2f(40.0f, 20.0f), Role::DEFENDER, color, M_PI*3/2));
+    players.push_back(new Player(85.0f, 20.0f, gf::Vector2f(50.0f, 30.0f), Role::DEFENDER, color, M_PI*3/2));
+    players.push_back(new Player(85.0f, 20.0f, gf::Vector2f(60.0f, 30.0f), Role::MIDFIELDER, color, M_PI*3/2));
+    players.push_back(new Player(85.0f, 20.0f, gf::Vector2f(70.0f, 30.0f), Role::MIDFIELDER, color, M_PI*3/2));
+    players.push_back(new Player(85.0f, 20.0f, gf::Vector2f(80.0f, 30.0f), Role::MIDFIELDER, color, M_PI*3/2));
+    players.push_back(new Player(80.0f, 20.0f, gf::Vector2f(90.0f, 40.0f), Role::ATTACKER, color, M_PI*3/2));
+    players.push_back(new Player(80.0f, 20.0f, gf::Vector2f(100.0f, 40.0f), Role::ATTACKER, color, M_PI*3/2));
 }
 
 void Team::setupPlayers(float fieldHeight, float fieldWidth) {

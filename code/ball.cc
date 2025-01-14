@@ -6,6 +6,7 @@ Ball::Ball(float size, gf::Vector2f position, gf::Color4f color)
 , m_position(position)
 , m_color(color)
 , belongsTo(nullptr)
+, cooldown(0)
 {
 }
 
@@ -28,6 +29,7 @@ void Ball::update(float dt) {
 
 
 void Ball::update(float dt) {
+    --cooldown;
     static constexpr float friction = 150.0f;
     float speed = std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y);
 
@@ -35,7 +37,7 @@ void Ball::update(float dt) {
         m_velocity = {0.0f, 0.0f};
     }
     if (speed > 0.001f) {
-        float deceleration = friction * dt;
+        float deceleration = belongsTo == nullptr ? (friction * dt) : 0;
         speed = std::max(speed - deceleration, 0.0f);
         
         if (speed > 0.0f) {
@@ -54,11 +56,14 @@ void Ball::update(float dt) {
 
 
 void Ball::lockTo(Player *p) {
-    belongsTo = p;
+    if (cooldown <= 0) {
+        belongsTo = p;
+    } 
 }
 
 void Ball::unlock() {
     belongsTo = nullptr;
+    cooldown = 5;
 }
 
 bool Ball::isLockedTo(Player *p) const {
@@ -73,7 +78,7 @@ void Ball::render(gf::RenderTarget& target) {
     gf::CircleShape shape(m_size);
     shape.setPosition(m_position);
     shape.setColor(m_color);
-    shape.setAnchor(gf::Anchor::TopLeft);
+    shape.setAnchor(gf::Anchor::Center);
     shape.setOutlineThickness(0.5f);
     shape.setOutlineColor(gf::Color::lighter(m_color));
     target.draw(shape);

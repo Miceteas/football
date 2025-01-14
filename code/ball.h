@@ -16,6 +16,7 @@ class Ball : public gf::Entity {
     gf::Color4f m_color;
     Player *belongsTo;
     bool m_isLocked; 
+    int cooldown;
 
   public:
     Ball(float size, gf::Vector2f position, gf::Color4f color);
