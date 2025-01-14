@@ -25,6 +25,7 @@
 #include <gf/Texture.h>
 #include <gf/Image.h>
 #include <cmath>
+#include <unordered_map>
 
 #include "config.h"
 #include "ball.h"
@@ -137,14 +138,43 @@ int main() {
   Team team("Team A", gf::Color::Azure);
   team.initPlayers();  // Initialize the players
 
+  // Texture players
+  /*gf::Texture texture("../assets/PNG/Blue/characterBlue(1).png") ;
+
+  gf::Sprite playerSprite;
+  playerSprite.setTexture(texture);*/
+
+  const std::string playerTexturesBasePath = "../assets/PNG/Blue/characterBlue (";
+  std::vector<gf::Texture> playerTextures;
+
+  for (int i = 1; i <= 10; ++i) {
+    gf::Texture texture(playerTexturesBasePath + std::to_string(i) + ").png");
+    playerTextures.push_back(std::move(texture));
+  }
+
+  gf::Texture playerTexture("../assets/PNG/Blue/characterBlue (1).png");
+  playerTextures.push_back(std::move(playerTexture));
+
+  
+  
+
   // default setup
   team.setupPlayers(window.getSize().x,window.getSize().y);
 
+  std::unordered_map<Player*, gf::Sprite> playerSprites;
+
+  for (size_t i = 0; i < team.getPlayers().size(); ++i) {
+    Player* player = team.getPlayers()[i];
+    gf::Sprite sprite(playerTextures[i]);
+    sprite.setScale({player->getSize()/ playerTextures[i].getSize().x, player->getSize() / playerTextures[i].getSize().y});
+    sprite.setPosition(player->getPosition());
+    sprite.rotate(M_PI / 2);
+    playerSprites[player] = sprite;
+  }
+
   // Add team players to the mainEntities
   
-  for (Player* player : team.getPlayers()) {
-    mainEntities.addEntity(*player);
-  }
+  
 
   Ball ball(10.0f, {200.0f, 20.0f}, gf::Color::Rose);
   mainEntities.addEntity(ball);
@@ -223,6 +253,10 @@ int main() {
 
     mainPlayer->update(dt.asSeconds());
 
+    for (auto& [player, sprite] : playerSprites) {
+      sprite.setPosition(player->getPosition());
+    }
+
     gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
     gf::Vector2f ballPosition = ball.getPosition();
 
@@ -260,12 +294,13 @@ int main() {
     renderer.clear();
     //renderer.draw(sprite);
     renderer.setView(view);
+    
+    for (auto& [player, sprite] : playerSprites) {
+      renderer.draw(sprite);
+    }
 
     ball.render(renderer);
 
-    for (Player* player : team.getPlayers()) {
-      player->render(renderer);
-    }
 
     renderer.display();
   }
