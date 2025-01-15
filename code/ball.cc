@@ -6,7 +6,8 @@ Ball::Ball(float size, gf::Vector2f position, gf::Color4f color)
 , m_position(position)
 , m_color(color)
 , belongsTo(nullptr)
-, cooldown(0)
+, m_cooldown(0)
+, lastTouchedBy(nullptr)
 {
 }
 
@@ -29,7 +30,7 @@ void Ball::update(float dt) {
 
 
 void Ball::update(float dt) {
-    --cooldown;
+    --m_cooldown;
     static constexpr float friction = 150.0f;
     float speed = std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y);
 
@@ -56,14 +57,15 @@ void Ball::update(float dt) {
 
 
 void Ball::lockTo(Player *p) {
-    if (cooldown <= 0) {
+    if (m_cooldown <= 0) {
         belongsTo = p;
+        lastTouchedBy = p;
     } 
 }
 
 void Ball::unlock() {
     belongsTo = nullptr;
-    cooldown = 5;
+    m_cooldown = 5;
 }
 
 bool Ball::isLockedTo(Player *p) const {
@@ -82,4 +84,36 @@ void Ball::render(gf::RenderTarget& target) {
     shape.setOutlineThickness(0.5f);
     shape.setOutlineColor(gf::Color::lighter(m_color));
     target.draw(shape);
+}
+
+Player *Ball::getLastTouchedBy() {
+    return lastTouchedBy;
+}
+
+int Ball::isOutOfField(int xsize, int ysize, int leftPole, int rightPole) {
+    if (m_position.y + m_size < 0) {
+        if (m_position.x + m_size < leftPole) {
+            return 1;
+        }else if (m_position.x - m_size > rightPole) {
+            return 3;
+        }else {
+            return 2;
+        }
+    }else if (m_position.y - m_size > ysize) {
+        if (m_position.x + m_size < leftPole) {
+            return 6;
+        }else if (m_position.x - m_size > rightPole) {
+            return 8;
+        }else {
+            return 7;
+        }
+    }else {
+        if (m_position.x + m_size < 0) {
+            return 4;
+        }else if (m_position.x - m_size > xsize) {
+            return 5;
+        }else {
+            return 0;
+        }
+    }
 }

@@ -72,6 +72,10 @@ bool Player::isEqual(float a, float b) {
     return std::fabs(a - b) < 0.01;
 }
 
+float Player::getAngle() {
+    return m_angle;
+}
+
 gf::Vector2f Player::getPassVelocity() {
     if (isEqual(m_angle, M_PI / 4)) {
         return {sqrt(300 * 300 / 2), sqrt(300 * 300 / 2)};
@@ -89,6 +93,28 @@ gf::Vector2f Player::getPassVelocity() {
         return {-300, 0};
     } else if (isEqual(m_angle, M_PI * 3 / 2)) {
         return {0, -300};
+    } else {
+        return {0, -1000};
+    }
+}
+
+gf::Vector2f Player::getShootVelocity() {
+    if (isEqual(m_angle, M_PI / 4)) {
+        return {sqrt(600 * 600 / 2), sqrt(600 * 600 / 2)};
+    } else if (isEqual(m_angle, M_PI * 3 / 4)) {
+        return {-sqrt(600 * 600 / 2), sqrt(600 * 600 / 2)};
+    } else if (isEqual(m_angle, M_PI * 5 / 4)) {
+        return {-sqrt(600 * 600 / 2), -sqrt(600 * 600 / 2)};
+    } else if (isEqual(m_angle, M_PI * 7 / 4)) {
+        return {sqrt(600 * 600 / 2), -sqrt(600 * 600 / 2)};
+    } else if (isEqual(m_angle, 0)) {
+        return {600, 0};
+    } else if (isEqual(m_angle, M_PI / 2)) {
+        return {0, 600};
+    } else if (isEqual(m_angle, M_PI)) {
+        return {-600, 0};
+    } else if (isEqual(m_angle, M_PI * 3 / 2)) {
+        return {0, -600};
     } else {
         return {0, -1000};
     }

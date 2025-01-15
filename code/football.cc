@@ -35,11 +35,62 @@
 
 #define FOOTBALL_DATA_DIR "@FOOTBALL_DATA_DIR@"
 
+#define BALLSIZE 10
+#define PLAYERSIZE 30
+#define FIELDXSIZE 3150
+#define FIELDYSIZE 2040
+#define LEFTPOLE 910
+#define RIGHTPOLE 1130
+
 // constants
-static constexpr float SPEED = 100.0f;
+static constexpr float SPEED = 120.0f;
+
+void touch(bool isLeft, bool forPlayerTeam) {
+  //Do something for a touch
+}
+
+void corner(int side, bool forPlayerTeam) {
+  //Do something for a corner (0 = topleft, 1 = topright, 2 = bottomleft, 3 = bottomright)
+}
+
+void goal(bool isPlayerTeam) {
+  //Do something for a goal
+}
+
+void checkOut(int isOut, std::vector<Player *> vec, Player *lastTouchedBy) {
+  if (isOut != 0) {
+      bool isMemberOfTeam = count(vec.begin(), vec.end(), lastTouchedBy) > 0;
+      switch (isOut) {
+        case 1 : 
+          corner(0, isMemberOfTeam);
+          break;
+        case 2 : 
+          goal(true);
+          break;
+        case 3 : 
+          corner(1, isMemberOfTeam);
+          break;
+        case 4 : 
+          touch(true, isMemberOfTeam);
+          break;
+        case 5 : 
+          touch(false, isMemberOfTeam);
+          break;
+        case 6 :
+          corner(2, isMemberOfTeam);
+          break;
+        case 7 : 
+          goal(false);
+          break;
+        case 8 :
+          corner(3, isMemberOfTeam);
+          break;
+      }
+    }
+}
 
 int main() {
-  static constexpr gf::Vector2u ScreenSize(500, 800);
+  static constexpr gf::Vector2u ScreenSize(800, 800);
 
   gf::Log::setLevel(gf::Log::Info);
 
@@ -113,6 +164,10 @@ int main() {
   passAction.addScancodeKeyControl(gf::Scancode::V); 
   actions.addAction(passAction);
 
+  gf::Action shootAction("Shoot");
+  shootAction.addScancodeKeyControl(gf::Scancode::B); 
+  actions.addAction(shootAction);
+
   // add entities
   gf::EntityContainer mainEntities;
 
@@ -168,7 +223,7 @@ int main() {
     gf::Sprite sprite(playerTextures[i]);
     sprite.setScale({player->getSize()/ playerTextures[i].getSize().x, player->getSize() / playerTextures[i].getSize().y});
     sprite.setPosition(player->getPosition());
-    sprite.rotate(M_PI / 2);
+    sprite.setRotation(player->getAngle());
     playerSprites[player] = sprite;
   }
 
@@ -176,7 +231,7 @@ int main() {
   
   
 
-  Ball ball(10.0f, {200.0f, 20.0f}, gf::Color::Rose);
+  Ball ball(BALLSIZE, {200.0f, 20.0f}, gf::Color::Rose);
   mainEntities.addEntity(ball);
   
   gf::Vector2f velocity(0.0f, 0.0f);
@@ -228,7 +283,10 @@ int main() {
       ball.unlock();
     }
 
-    if (ball.isLockedTo(mainPlayer) && passAction.isActive()) {
+    if (ball.isLockedTo(mainPlayer) && shootAction.isActive()) {
+      ball.unlock();
+      ball.setVelocity(mainPlayer->getShootVelocity());
+    }else if (ball.isLockedTo(mainPlayer) && passAction.isActive()) {
       ball.unlock(); 
       ball.setVelocity(mainPlayer->getPassVelocity());
     }
@@ -285,6 +343,10 @@ int main() {
 
     ball.update(dt.asSeconds());
 
+    int out = ball.isOutOfField(FIELDXSIZE, FIELDYSIZE, LEFTPOLE, RIGHTPOLE);
+
+    checkOut(out, team.getPlayers(), ball.getLastTouchedBy());
+
     view.setCenter(mainPlayer->getPosition());
     
     // render
@@ -293,8 +355,9 @@ int main() {
     renderer.setView(view);
     
     for (auto& [player, sprite] : playerSprites) {
-      renderer.draw(sprite);
-    }
+      // renderer.draw(sprite);
+      player->render(renderer);
+    } 
 
     ball.render(renderer);
 

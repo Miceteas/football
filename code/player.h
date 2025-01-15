@@ -33,7 +33,9 @@ class Player : public gf::Entity {
     void setVelocity(gf::Vector2f velocity);
     void update(float dt);
     void render(gf::RenderTarget& target);
+    float getAngle();
     gf::Vector2f getPassVelocity();
+    gf::Vector2f getShootVelocity();
     /*---------------------------------*/
     void makePass(gf::Vector2f direction);
 
