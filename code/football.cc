@@ -58,34 +58,34 @@ void goal(bool isPlayerTeam) {
 }
 
 void checkOut(int isOut, std::vector<Player *> teamPlayersVec, Player *lastTouchedBy) {
-  if (isOut != 0) {
-      bool isMemberOfTeam = count(teamPlayersVec.begin(), teamPlayersVec.end(), lastTouchedBy) > 0;
-      switch (isOut) {
-        case 1 : 
-          corner(0, isMemberOfTeam);
-          break;
-        case 2 : 
-          goal(true);
-          break;
-        case 3 : 
-          corner(1, isMemberOfTeam);
-          break;
-        case 4 : 
-          touch(true, isMemberOfTeam);
-          break;
-        case 5 : 
-          touch(false, isMemberOfTeam);
-          break;
-        case 6 :
-          corner(2, isMemberOfTeam);
-          break;
-        case 7 : 
-          goal(false);
-          break;
-        case 8 :
-          corner(3, isMemberOfTeam);
-          break;
-      }
+    if (isOut != 0) {
+        bool isMemberOfTeam = count(teamPlayersVec.begin(), teamPlayersVec.end(), lastTouchedBy) > 0;
+        switch (isOut) {
+            case 1 : 
+                corner(0, isMemberOfTeam);
+                break;
+            case 2 : 
+                goal(true);
+                break;
+            case 3 : 
+                corner(1, isMemberOfTeam);
+                break;
+            case 4 : 
+                touch(true, isMemberOfTeam);
+                break;
+            case 5 : 
+                touch(false, isMemberOfTeam);
+                break;
+            case 6 :
+                corner(2, isMemberOfTeam);
+                break;
+            case 7 : 
+                goal(false);
+                break;
+            case 8 :
+                corner(3, isMemberOfTeam);
+                break;
+        }
     }
 }
 
@@ -98,167 +98,167 @@ gf::Vector2f normalizeVelocity(gf::Vector2f velocity) {
 }
 
 int main() {
-  static constexpr gf::Vector2u ScreenSize(800, 800);
+    static constexpr gf::Vector2u ScreenSize(800, 800);
 
-  gf::Log::setLevel(gf::Log::Info);
+    gf::Log::setLevel(gf::Log::Info);
 
-  // setup resource directory
-  gf::ResourceManager resourceManager;
-  resourceManager.addSearchDir(FOOTBALL_DATA_DIR);
-  //resourceManager.addSearchDir("./assets");
+    // setup resource directory
+    gf::ResourceManager resourceManager;
+    resourceManager.addSearchDir(FOOTBALL_DATA_DIR);
+    //resourceManager.addSearchDir("./assets");
 
-  gf::Random random;
+    gf::Random random;
 
-  // initialize window
-  gf::Window window("gf football", ScreenSize, ~gf::WindowHints::Resizable);
-  window.setVerticalSyncEnabled(true);
-  window.setFramerateLimit(60);
+    // initialize window
+    gf::Window window("gf football", ScreenSize, ~gf::WindowHints::Resizable);
+    window.setVerticalSyncEnabled(true);
+    window.setFramerateLimit(60);
 
-  gf::RenderWindow renderer(window);
+    gf::RenderWindow renderer(window);
 
-  gf::Vector2u windowSize = window.getSize();
+    gf::Vector2u windowSize = window.getSize();
 
-  // add cameras
-  gf::ViewContainer views;
-  gf::ExtendView view({0.0f, 20.0f}, {float(window.getSize().x), float(window.getSize().y)});
-  views.addView(view);
-  views.setInitialFramebufferSize(window.getSize());
+    // add cameras
+    gf::ViewContainer views;
+    gf::ExtendView view({0.0f, 20.0f}, {float(window.getSize().x), float(window.getSize().y)});
+    views.addView(view);
+    views.setInitialFramebufferSize(window.getSize());
 
-  // add actions
-  gf::ActionContainer actions;
+    // add actions
+    gf::ActionContainer actions;
 
-  gf::Action closeWindowAction("Close window");
-  closeWindowAction.addCloseControl();
-  closeWindowAction.addKeycodeKeyControl(gf::Keycode::Escape);
-  actions.addAction(closeWindowAction);
+    gf::Action closeWindowAction("Close window");
+    closeWindowAction.addCloseControl();
+    closeWindowAction.addKeycodeKeyControl(gf::Keycode::Escape);
+    actions.addAction(closeWindowAction);
 
-  gf::Action fullscreenAction("Fullscreen");
-  fullscreenAction.addKeycodeKeyControl(gf::Keycode::F);
-  actions.addAction(fullscreenAction);
+    gf::Action fullscreenAction("Fullscreen");
+    fullscreenAction.addKeycodeKeyControl(gf::Keycode::F);
+    actions.addAction(fullscreenAction);
 
-  gf::Action leftAction("Left");
-  leftAction.addScancodeKeyControl(gf::Scancode::A);
-  leftAction.addScancodeKeyControl(gf::Scancode::Q);
-  leftAction.addScancodeKeyControl(gf::Scancode::Left);
-  leftAction.setContinuous();
-  actions.addAction(leftAction);
+    gf::Action leftAction("Left");
+    leftAction.addScancodeKeyControl(gf::Scancode::A);
+    leftAction.addScancodeKeyControl(gf::Scancode::Q);
+    leftAction.addScancodeKeyControl(gf::Scancode::Left);
+    leftAction.setContinuous();
+    actions.addAction(leftAction);
 
-  gf::Action rightAction("Right");
-  rightAction.addScancodeKeyControl(gf::Scancode::D);
-  rightAction.addScancodeKeyControl(gf::Scancode::Right);
-  rightAction.setContinuous();
-  actions.addAction(rightAction);
+    gf::Action rightAction("Right");
+    rightAction.addScancodeKeyControl(gf::Scancode::D);
+    rightAction.addScancodeKeyControl(gf::Scancode::Right);
+    rightAction.setContinuous();
+    actions.addAction(rightAction);
 
-  gf::Action upAction("Up");
-  upAction.addScancodeKeyControl(gf::Scancode::W);
-  upAction.addScancodeKeyControl(gf::Scancode::Z);
-  upAction.addScancodeKeyControl(gf::Scancode::Up);
-  upAction.setContinuous();
-  actions.addAction(upAction);
+    gf::Action upAction("Up");
+    upAction.addScancodeKeyControl(gf::Scancode::W);
+    upAction.addScancodeKeyControl(gf::Scancode::Z);
+    upAction.addScancodeKeyControl(gf::Scancode::Up);
+    upAction.setContinuous();
+    actions.addAction(upAction);
 
-  gf::Action downAction("Down");
-  downAction.addScancodeKeyControl(gf::Scancode::S);
-  downAction.addScancodeKeyControl(gf::Scancode::Down);
-  downAction.setContinuous();
-  actions.addAction(downAction);
+    gf::Action downAction("Down");
+    downAction.addScancodeKeyControl(gf::Scancode::S);
+    downAction.addScancodeKeyControl(gf::Scancode::Down);
+    downAction.setContinuous();
+    actions.addAction(downAction);
 
-  gf::Action dropAction("Drop");
-  dropAction.addScancodeKeyControl(gf::Scancode::X);
-  actions.addAction(dropAction);
+    gf::Action dropAction("Drop");
+    dropAction.addScancodeKeyControl(gf::Scancode::X);
+    actions.addAction(dropAction);
 
-  gf::Action switchAction("Switch");
-  switchAction.addScancodeKeyControl(gf::Scancode::C);
-  actions.addAction(switchAction);
+    gf::Action switchAction("Switch");
+    switchAction.addScancodeKeyControl(gf::Scancode::C);
+    actions.addAction(switchAction);
 
-  gf::Action passAction("Pass");
-  passAction.addScancodeKeyControl(gf::Scancode::V); 
-  actions.addAction(passAction);
+    gf::Action passAction("Pass");
+    passAction.addScancodeKeyControl(gf::Scancode::V); 
+    actions.addAction(passAction);
 
-  gf::Action shootAction("Shoot");
-  shootAction.addScancodeKeyControl(gf::Scancode::Space); 
-  actions.addAction(shootAction);
+    gf::Action shootAction("Shoot");
+    shootAction.addScancodeKeyControl(gf::Scancode::Space); 
+    actions.addAction(shootAction);
 
-  gf::Action tackleAction("Tackle");
-  tackleAction.addScancodeKeyControl(gf::Scancode::E); 
-  actions.addAction(tackleAction);
+    gf::Action tackleAction("Tackle");
+    tackleAction.addScancodeKeyControl(gf::Scancode::E); 
+    actions.addAction(tackleAction);
 
-  gf::Action sprintAction("Sprint");
-  sprintAction.addScancodeKeyControl(gf::Scancode::B); 
-  actions.addAction(sprintAction);
+    gf::Action sprintAction("Sprint");
+    sprintAction.addScancodeKeyControl(gf::Scancode::B); 
+    actions.addAction(sprintAction);
 
 
-  // add entities
-  gf::EntityContainer mainEntities;
+    // add entities
+    gf::EntityContainer mainEntities;
 
-  gf::Texture grassTexture("../assets/Tilesheet/groundGrass.png");
-  gf::Sprite sprite;
+    gf::Texture grassTexture("../assets/Tilesheet/groundGrass.png");
+    gf::Sprite sprite;
 
-  sprite.setTexture(grassTexture);
+    sprite.setTexture(grassTexture);
 
-  gf::Vector2f scale(
-    float(window.getSize().x) / grassTexture.getSize().x,
-    float(window.getSize().y) / grassTexture.getSize().y
-  );
-  
-  sprite.setScale(scale);
-  sprite.setPosition({0.0f, float(window.getSize().x)});
+    gf::Vector2f scale(
+        float(window.getSize().x) / grassTexture.getSize().x,
+        float(window.getSize().y) / grassTexture.getSize().y
+    );
+    
+    sprite.setScale(scale);
+    sprite.setPosition({0.0f, float(window.getSize().x)});
 
-  //renderer.draw(sprite);
+    //renderer.draw(sprite);
 
-  gf::Clock clock;
-  bool fullscreen = false;
+    gf::Clock clock;
+    bool fullscreen = false;
 
-  // Initialize a team with 11 players
-  Team team("Team A", gf::Color::Azure);
-  team.initPlayers();  // Initialize the players
+    // Initialize a team with 11 players
+    Team team("Team A", gf::Color::Azure);
+    team.initPlayers();  // Initialize the players
 
-  // Texture players
-  /*gf::Texture texture("../assets/PNG/Blue/characterBlue(1).png") ;
+    // Texture players
+    /*gf::Texture texture("../assets/PNG/Blue/characterBlue(1).png") ;
 
-  gf::Sprite playerSprite;
-  playerSprite.setTexture(texture);*/
+    gf::Sprite playerSprite;
+    playerSprite.setTexture(texture);*/
 
-  const std::string playerTexturesBasePath = "../assets/PNG/Blue/characterBlue (";
-  std::vector<gf::Texture> playerTextures;
+    const std::string playerTexturesBasePath = "../assets/PNG/Blue/characterBlue (";
+    std::vector<gf::Texture> playerTextures;
 
-  for (int i = 1; i <= 10; ++i) {
-    gf::Texture texture(playerTexturesBasePath + std::to_string(i) + ").png");
-    playerTextures.push_back(std::move(texture));
-  }
+    for (int i = 1; i <= 10; ++i) {
+        gf::Texture texture(playerTexturesBasePath + std::to_string(i) + ").png");
+        playerTextures.push_back(std::move(texture));
+    }
 
-  gf::Texture playerTexture("../assets/PNG/Blue/characterBlue (1).png");
-  playerTextures.push_back(std::move(playerTexture));
+    gf::Texture playerTexture("../assets/PNG/Blue/characterBlue (1).png");
+    playerTextures.push_back(std::move(playerTexture));
 
-  
-  
+    
+    
 
-  // default setup
-  team.setupPlayers(window.getSize().x,window.getSize().y);
+    // default setup
+    team.setupPlayers(window.getSize().x,window.getSize().y);
 
-  std::unordered_map<Player*, gf::Sprite> playerSprites;
+    std::unordered_map<Player*, gf::Sprite> playerSprites;
 
-  for (size_t i = 0; i < team.getPlayers().size(); ++i) {
-    Player* player = team.getPlayers()[i];
-    gf::Sprite sprite(playerTextures[i]);
-    sprite.setScale({player->getSize()/ playerTextures[i].getSize().x, player->getSize() / playerTextures[i].getSize().y});
-    sprite.setPosition(player->getPosition());
-    sprite.setRotation(player->getAngle());
-    playerSprites[player] = sprite;
-  }
+    for (size_t i = 0; i < team.getPlayers().size(); ++i) {
+        Player* player = team.getPlayers()[i];
+        gf::Sprite sprite(playerTextures[i]);
+        sprite.setScale({player->getSize()/ playerTextures[i].getSize().x, player->getSize() / playerTextures[i].getSize().y});
+        sprite.setPosition(player->getPosition());
+        sprite.setRotation(player->getAngle());
+        playerSprites[player] = sprite;
+    }
 
-  // Add team players to the mainEntities
-  
-  
+    // Add team players to the mainEntities
+    
+    
 
-  Ball ball(BALLSIZE, {200.0f, 20.0f}, gf::Color::Rose);
-  mainEntities.addEntity(ball);
-  
-  gf::Vector2f velocity(0.0f, 0.0f);
+    Ball ball(BALLSIZE, {200.0f, 20.0f}, gf::Color::Rose);
+    mainEntities.addEntity(ball);
+    
+    gf::Vector2f velocity(0.0f, 0.0f);
 
-  Player* mainPlayer = team.getPlayers()[10]; 
+    Player* mainPlayer = team.getPlayers()[10]; 
 
-  // main loop
-  bool cam1 = true;
+    // main loop
+    bool cam1 = true;
 
 
   while (window.isOpen()) {
@@ -266,17 +266,17 @@ int main() {
     gf::Event event;
 
     while (window.pollEvent(event)) {
-      actions.processEvent(event);
-      views.processEvent(event);
+        actions.processEvent(event);
+        views.processEvent(event);
     }
 
     if (closeWindowAction.isActive()) {
-      window.close();
+        window.close();
     }
 
     if (fullscreenAction.isActive()) {
-      fullscreen = !fullscreen;
-      window.setFullscreen(fullscreen);
+        fullscreen = !fullscreen;
+        window.setFullscreen(fullscreen);
     }
 
     velocity = {0.0f, 0.0f};
@@ -322,7 +322,7 @@ int main() {
             mainPlayer = team.getPlayers()[10]; 
         }
         cam1 = !cam1;
-        }
+    }
 
         actions.reset();
 
@@ -332,7 +332,7 @@ int main() {
         mainPlayer->update(dt.asSeconds());
 
         for (auto& [player, sprite] : playerSprites) {
-        sprite.setPosition(player->getPosition());
+            sprite.setPosition(player->getPosition());
         }
 
         gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
@@ -355,13 +355,13 @@ int main() {
                             mainPlayerBottom > ballTop && mainPlayerTop < ballBottom);
 
         if (isColliding) {
-        ball.lockTo(mainPlayer);
+            ball.lockTo(mainPlayer);
         }
 
         if (ball.isLockedTo(mainPlayer)) {
-        ball.setVelocity(velocity);
+            ball.setVelocity(velocity);
         } else {
-        ball.setVelocity(ball.getVelocity());
+            ball.setVelocity(ball.getVelocity());
         }
 
         ball.update(dt.asSeconds());
@@ -378,8 +378,8 @@ int main() {
         renderer.setView(view);
         
         for (auto& [player, sprite] : playerSprites) {
-        // renderer.draw(sprite);
-        player->render(renderer);
+            // renderer.draw(sprite);
+            player->render(renderer);
         } 
 
         ball.render(renderer);
