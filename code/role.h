@@ -3,6 +3,7 @@
 
 enum class Role {
     ATTACKER,
+    MIDFIELDER,
     DEFENDER,
     GOALKEEPER
 };

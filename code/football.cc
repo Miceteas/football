@@ -1,22 +1,3 @@
-/* Gamedev Framework (gf)
- * Copyright (C) 2016-2022 Julien Bernard
- *
- * This software is provided 'as-is', without any express or implied
- * warranty.  In no event will the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software
- *    in a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
- */
 #include <cassert>
 #include <cstdio>
 #include <iostream>
@@ -44,23 +25,76 @@
 #include <gf/Texture.h>
 #include <gf/Image.h>
 #include <cmath>
+#include <unordered_map>
 
 #include "config.h"
 #include "ball.h"
 #include "player.h"
 #include "role.h"
+#include "team.h"
 
 #define FOOTBALL_DATA_DIR "@FOOTBALL_DATA_DIR@"
 
-static constexpr float SPEED = 100.0f;
+#define BALLSIZE 10
+#define PLAYERSIZE 30
+#define FIELDXSIZE 3150
+#define FIELDYSIZE 2040
+#define LEFTPOLE 910
+#define RIGHTPOLE 1130
+
+// constants
+static constexpr float SPEED = 120.0f;
+
+void touch(bool isLeft, bool forPlayerTeam) {
+  //Do something for a touch
+}
+
+void corner(int side, bool forPlayerTeam) {
+  //Do something for a corner (0 = topleft, 1 = topright, 2 = bottomleft, 3 = bottomright)
+}
+
+void goal(bool isPlayerTeam) {
+  //Do something for a goal
+}
+
+void checkOut(int isOut, std::vector<Player *> vec, Player *lastTouchedBy) {
+  if (isOut != 0) {
+      bool isMemberOfTeam = count(vec.begin(), vec.end(), lastTouchedBy) > 0;
+      switch (isOut) {
+        case 1 : 
+          corner(0, isMemberOfTeam);
+          break;
+        case 2 : 
+          goal(true);
+          break;
+        case 3 : 
+          corner(1, isMemberOfTeam);
+          break;
+        case 4 : 
+          touch(true, isMemberOfTeam);
+          break;
+        case 5 : 
+          touch(false, isMemberOfTeam);
+          break;
+        case 6 :
+          corner(2, isMemberOfTeam);
+          break;
+        case 7 : 
+          goal(false);
+          break;
+        case 8 :
+          corner(3, isMemberOfTeam);
+          break;
+      }
+    }
+}
 
 int main() {
-  static constexpr gf::Vector2u ScreenSize(500, 800);
+  static constexpr gf::Vector2u ScreenSize(800, 800);
 
   gf::Log::setLevel(gf::Log::Info);
 
   // setup resource directory
-
   gf::ResourceManager resourceManager;
   resourceManager.addSearchDir(FOOTBALL_DATA_DIR);
   //resourceManager.addSearchDir("./assets");
@@ -68,25 +102,21 @@ int main() {
   gf::Random random;
 
   // initialize window
-
   gf::Window window("gf football", ScreenSize, ~gf::WindowHints::Resizable);
   window.setVerticalSyncEnabled(true);
   window.setFramerateLimit(60);
 
   gf::RenderWindow renderer(window);
 
+  gf::Vector2u windowSize = window.getSize();
+
   // add cameras
-
   gf::ViewContainer views;
-
-  gf::ExtendView view({0.0f, 20.0f}, {500.0f, 500.0f});
-
+  gf::ExtendView view({0.0f, 20.0f}, {float(window.getSize().x), float(window.getSize().y)});
   views.addView(view);
-
-  views.setInitialFramebufferSize(ScreenSize);
+  views.setInitialFramebufferSize(window.getSize());
 
   // add actions
-
   gf::ActionContainer actions;
 
   gf::Action closeWindowAction("Close window");
@@ -148,52 +178,76 @@ int main() {
 
 
   // add entities
-
   gf::EntityContainer mainEntities;
 
-  //renderer.clear(gf::Color::fromRgba32(39, 98, 32, 128)); // rgba(39, 98, 32, 0.8)
-
   gf::Texture grassTexture("../assets/Tilesheet/groundGrass.png");
-
   gf::Sprite sprite;
-  gf::Vector2u windowSize = window.getSize();
-
 
   sprite.setTexture(grassTexture);
 
   gf::Vector2f scale(
-    float(windowSize.x) / grassTexture.getSize().x,
-    float(windowSize.y) / grassTexture.getSize().y
+    float(window.getSize().x) / grassTexture.getSize().x,
+    float(window.getSize().y) / grassTexture.getSize().y
   );
   
   sprite.setScale(scale);
-  sprite.setPosition({0.0f, 0.0f});
+  sprite.setPosition({0.0f, float(window.getSize().x)});
 
-
-  renderer.draw(sprite);
-  
+  //renderer.draw(sprite);
 
   gf::Clock clock;
   bool fullscreen = false;
 
-  Player player1(100.0f, 20.0f, {0.0f, 20.0f}, Role::ATTACKER, gf::Color::Azure);
+  // Initialize a team with 11 players
+  Team team("Team A", gf::Color::Azure);
+  team.initPlayers();  // Initialize the players
 
-  mainEntities.addEntity(player1);
+  // Texture players
+  /*gf::Texture texture("../assets/PNG/Blue/characterBlue(1).png") ;
 
-  Player player2(100.0f, 20.0f, {400.0f, 20.0f}, Role::ATTACKER, gf::Color::Red);
+  gf::Sprite playerSprite;
+  playerSprite.setTexture(texture);*/
 
-  mainEntities.addEntity(player2);
+  const std::string playerTexturesBasePath = "../assets/PNG/Blue/characterBlue (";
+  std::vector<gf::Texture> playerTextures;
 
-  Ball ball(10.0f, {200.0f, 20.0f}, gf::Color::Rose);
+  for (int i = 1; i <= 10; ++i) {
+    gf::Texture texture(playerTexturesBasePath + std::to_string(i) + ").png");
+    playerTextures.push_back(std::move(texture));
+  }
 
+  gf::Texture playerTexture("../assets/PNG/Blue/characterBlue (1).png");
+  playerTextures.push_back(std::move(playerTexture));
+
+  
+  
+
+  // default setup
+  team.setupPlayers(window.getSize().x,window.getSize().y);
+
+  std::unordered_map<Player*, gf::Sprite> playerSprites;
+
+  for (size_t i = 0; i < team.getPlayers().size(); ++i) {
+    Player* player = team.getPlayers()[i];
+    gf::Sprite sprite(playerTextures[i]);
+    sprite.setScale({player->getSize()/ playerTextures[i].getSize().x, player->getSize() / playerTextures[i].getSize().y});
+    sprite.setPosition(player->getPosition());
+    sprite.setRotation(player->getAngle());
+    playerSprites[player] = sprite;
+  }
+
+  // Add team players to the mainEntities
+  
+  
+
+  Ball ball(BALLSIZE, {200.0f, 20.0f}, gf::Color::Rose);
   mainEntities.addEntity(ball);
   
   gf::Vector2f velocity(0.0f, 0.0f);
 
-  Player *mainPlayer = &player1;
+  Player* mainPlayer = team.getPlayers()[10]; 
 
   // main loop
-
   bool cam1 = true;
 
 
@@ -217,7 +271,7 @@ int main() {
 
     if ((leftAction.isActive() && rightAction.isActive()) || (!leftAction.isActive() && !rightAction.isActive())) {
       velocity.x = 0;
-    }else {
+    } else {
       if (leftAction.isActive()) {
         velocity.x = -SPEED;
       } else if (rightAction.isActive()) {
@@ -227,7 +281,7 @@ int main() {
     
     if ((upAction.isActive() && downAction.isActive()) || (!upAction.isActive() && !downAction.isActive())) {
       velocity.y = 0;
-    }else {
+    } else {
       if (upAction.isActive()) {
         velocity.y = -SPEED;
       } else if (downAction.isActive()) {
@@ -278,83 +332,79 @@ if (ball.isLockedTo(mainPlayer)) {
 }
 
 
-/*-----------------------------------------------------------------------------------------------------------------------------------*/
-
-if (tackleAction.isActive()) {
-    
-}
-
-/*-----------------------------------------------------------------------------------------------------------------------------------*/
-
 if (switchAction.isActive()) {
-    if (cam1) {
-        mainPlayer = &player2;
-        player1.setVelocity({0.0f, 0.0f});
-    } else {
-        mainPlayer = &player1;
-        player2.setVelocity({0.0f, 0.0f});
+      // Switch main player between two players => to change
+      if (cam1) {
+        mainPlayer = team.getPlayers()[0];  
+      } else {
+        mainPlayer = team.getPlayers()[10]; 
+      }
+      cam1 = !cam1;
     }
-    cam1 = !cam1;
-}
 
-actions.reset();
+    actions.reset();
 
-gf::Time dt = clock.restart();
-mainPlayer->setVelocity(velocity);
+    gf::Time dt = clock.restart();
+    mainPlayer->setVelocity(velocity);
 
-mainPlayer->update(dt.asSeconds());
+    mainPlayer->update(dt.asSeconds());
 
-gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
-gf::Vector2f ballPosition = ball.getPosition();
+    for (auto& [player, sprite] : playerSprites) {
+      sprite.setPosition(player->getPosition());
+    }
 
-float mainPlayerSize = mainPlayer->getSize();
-float ballSize = mainPlayerSize;
+    gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
+    gf::Vector2f ballPosition = ball.getPosition();
 
-float mainPlayerLeft = mainPlayerPosition.x;
-float mainPlayerRight = mainPlayerPosition.x + mainPlayerSize;
-float mainPlayerTop = mainPlayerPosition.y;
-float mainPlayerBottom = mainPlayerPosition.y + mainPlayerSize;
+    float mainPlayerSize = mainPlayer->getSize();
+    float ballSize = mainPlayerSize;
 
-float ballLeft = ballPosition.x;
-float ballRight = ballPosition.x + ballSize;
-float ballTop = ballPosition.y;
-float ballBottom = ballPosition.y + ballSize;
+    float mainPlayerLeft = mainPlayerPosition.x;
+    float mainPlayerRight = mainPlayerPosition.x + mainPlayerSize;
+    float mainPlayerTop = mainPlayerPosition.y;
+    float mainPlayerBottom = mainPlayerPosition.y + mainPlayerSize;
 
-bool isColliding = (mainPlayerRight > ballLeft && mainPlayerLeft < ballRight &&
-                    mainPlayerBottom > ballTop && mainPlayerTop < ballBottom);
+    float ballLeft = ballPosition.x;
+    float ballRight = ballPosition.x + ballSize;
+    float ballTop = ballPosition.y;
+    float ballBottom = ballPosition.y + ballSize;
 
-if (isColliding) {
-    ball.lockTo(mainPlayer);
-}
+    bool isColliding = (mainPlayerRight > ballLeft && mainPlayerLeft < ballRight &&
+                        mainPlayerBottom > ballTop && mainPlayerTop < ballBottom);
 
-if (ball.isLockedTo(mainPlayer)) {
-    ball.setVelocity(velocity);
-} else {
-    ball.setVelocity(ball.getVelocity());
-}
+    if (isColliding) {
+      ball.lockTo(mainPlayer);
+    }
 
-ball.update(dt.asSeconds());
+    if (ball.isLockedTo(mainPlayer)) {
+      ball.setVelocity(velocity);
+    } else {
+      ball.setVelocity(ball.getVelocity());
+    }
 
-view.setCenter(mainPlayer->getPosition());
+    ball.update(dt.asSeconds());
 
+    int out = ball.isOutOfField(FIELDXSIZE, FIELDYSIZE, LEFTPOLE, RIGHTPOLE);
 
+    checkOut(out, team.getPlayers(), ball.getLastTouchedBy());
+
+    view.setCenter(mainPlayer->getPosition());
+    
     // render
     renderer.clear();
-
-    renderer.draw(sprite);
-
+    //renderer.draw(sprite);
     renderer.setView(view);
-    ball.render(renderer);
-    player1.render(renderer);
-    player2.render(renderer);
-    // mainEntities.render(renderer);
-    renderer.display();
+    
+    for (auto& [player, sprite] : playerSprites) {
+      // renderer.draw(sprite);
+      player->render(renderer);
+    } 
 
+    ball.render(renderer);
+
+
+    renderer.display();
   }
 
   return 0;
 }
-
-
-//Pas oublier une entité pour tous les joueurs pour les 2 équipes en même temps
-//
