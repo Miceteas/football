@@ -130,6 +130,7 @@ int main() {
 
   gf::Action leftAction("Left");
   leftAction.addScancodeKeyControl(gf::Scancode::A);
+  leftAction.addScancodeKeyControl(gf::Scancode::Q);
   leftAction.addScancodeKeyControl(gf::Scancode::Left);
   leftAction.setContinuous();
   actions.addAction(leftAction);
@@ -142,6 +143,7 @@ int main() {
 
   gf::Action upAction("Up");
   upAction.addScancodeKeyControl(gf::Scancode::W);
+  upAction.addScancodeKeyControl(gf::Scancode::Z);
   upAction.addScancodeKeyControl(gf::Scancode::Up);
   upAction.setContinuous();
   actions.addAction(upAction);
