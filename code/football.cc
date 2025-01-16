@@ -134,6 +134,18 @@ int main() {
   passAction.addScancodeKeyControl(gf::Scancode::V); 
   actions.addAction(passAction);
 
+  gf::Action shootAction("Shoot");
+  shootAction.addScancodeKeyControl(gf::Scancode::Space); 
+  actions.addAction(shootAction);
+
+  gf::Action tackleAction("Tackle");
+  tackleAction.addScancodeKeyControl(gf::Scancode::E); 
+  actions.addAction(tackleAction);
+
+  gf::Action sprintAction("Sprint");
+  sprintAction.addScancodeKeyControl(gf::Scancode::B); 
+  actions.addAction(sprintAction);
+
 
   // add entities
 
@@ -184,8 +196,9 @@ int main() {
 
   bool cam1 = true;
 
+
   while (window.isOpen()) {
-    // input
+    // inputs
     gf::Event event;
 
     while (window.pollEvent(event)) {
@@ -211,7 +224,7 @@ int main() {
         velocity.x = SPEED;
       }
     }
-
+    
     if ((upAction.isActive() && downAction.isActive()) || (!upAction.isActive() && !downAction.isActive())) {
       velocity.y = 0;
     }else {
@@ -222,6 +235,8 @@ int main() {
       }
     }
 
+
+
     // update
 
 if (dropAction.isActive()) {
@@ -229,12 +244,47 @@ if (dropAction.isActive()) {
 }
 
 if (ball.isLockedTo(mainPlayer)) {
-  if (passAction.isActive()) {
-    ball.unlock(); 
-    gf::Vector2f passDirection = {300.0f, 0.0f};
-    ball.setVelocity(passDirection);
-  }
+    if (passAction.isActive()) {
+        float passPower = 200.0f;
+        ball.unlock();
+
+        gf::Vector2f ballPosition = ball.getPosition();
+        gf::Vector2f playerPosition = mainPlayer->getPosition();
+        if (ballPosition.y < playerPosition.y) {
+            gf::Vector2f passDirection = {0.0f, -passPower};
+            ball.setVelocity(passDirection);
+        }
+        
+        else if (ballPosition.y > playerPosition.y) {
+            gf::Vector2f passDirection = {0.0f, passPower}; 
+            ball.setVelocity(passDirection);
+        }
+        else if (ballPosition.x < playerPosition.x) {
+            gf::Vector2f passDirection = {-passPower, 0.0f};
+            ball.setVelocity(passDirection);
+        }
+        else if (ballPosition.x > playerPosition.x) {
+            gf::Vector2f passDirection = {passPower, 0.0f};
+            ball.setVelocity(passDirection);
+        }
+    }
+
+    if (shootAction.isActive()) {
+        float shootPower = 300.0f;
+        ball.unlock();
+        gf::Vector2f passDirection = {shootPower, 0.0f};
+        ball.setVelocity(passDirection);
+    }
 }
+
+
+/*-----------------------------------------------------------------------------------------------------------------------------------*/
+
+if (tackleAction.isActive()) {
+    
+}
+
+/*-----------------------------------------------------------------------------------------------------------------------------------*/
 
 if (switchAction.isActive()) {
     if (cam1) {
