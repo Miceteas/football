@@ -1,5 +1,8 @@
 #include "player.h"
 
+#define PASSVELOCITY 300
+#define SHOOTVELOCITY 600
+
 Player::Player(float stamina, float size, gf::Vector2f position, Role role, gf::Color4f color, float angle)
 : m_stamina(stamina)
 , m_velocity({0, 0})
@@ -82,21 +85,21 @@ float Player::getAngle() {
 
 gf::Vector2f Player::getPassVelocity() {
     if (isEqual(m_angle, M_PI / 4)) {
-        return {sqrt(300 * 300 / 2), sqrt(300 * 300 / 2)};
+        return {sqrt(PASSVELOCITY * PASSVELOCITY / 2), sqrt(PASSVELOCITY * PASSVELOCITY / 2)};
     } else if (isEqual(m_angle, M_PI * 3 / 4)) {
-        return {-sqrt(300 * 300 / 2), sqrt(300 * 300 / 2)};
+        return {-sqrt(PASSVELOCITY * PASSVELOCITY / 2), sqrt(PASSVELOCITY * PASSVELOCITY / 2)};
     } else if (isEqual(m_angle, M_PI * 5 / 4)) {
-        return {-sqrt(300 * 300 / 2), -sqrt(300 * 300 / 2)};
+        return {-sqrt(PASSVELOCITY * PASSVELOCITY / 2), -sqrt(PASSVELOCITY * PASSVELOCITY / 2)};
     } else if (isEqual(m_angle, M_PI * 7 / 4)) {
-        return {sqrt(300 * 300 / 2), -sqrt(300 * 300 / 2)};
+        return {sqrt(PASSVELOCITY * PASSVELOCITY / 2), -sqrt(PASSVELOCITY * PASSVELOCITY / 2)};
     } else if (isEqual(m_angle, 0)) {
-        return {300, 0};
+        return {PASSVELOCITY, 0};
     } else if (isEqual(m_angle, M_PI / 2)) {
-        return {0, 300};
+        return {0, PASSVELOCITY};
     } else if (isEqual(m_angle, M_PI)) {
-        return {-300, 0};
+        return {-PASSVELOCITY, 0};
     } else if (isEqual(m_angle, M_PI * 3 / 2)) {
-        return {0, -300};
+        return {0, -PASSVELOCITY};
     } else {
         return {0, -1000};
     }
@@ -104,21 +107,21 @@ gf::Vector2f Player::getPassVelocity() {
 
 gf::Vector2f Player::getShootVelocity() {
     if (isEqual(m_angle, M_PI / 4)) {
-        return {sqrt(600 * 600 / 2), sqrt(600 * 600 / 2)};
+        return {sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2), sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2)};
     } else if (isEqual(m_angle, M_PI * 3 / 4)) {
-        return {-sqrt(600 * 600 / 2), sqrt(600 * 600 / 2)};
+        return {-sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2), sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2)};
     } else if (isEqual(m_angle, M_PI * 5 / 4)) {
-        return {-sqrt(600 * 600 / 2), -sqrt(600 * 600 / 2)};
+        return {-sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2), -sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2)};
     } else if (isEqual(m_angle, M_PI * 7 / 4)) {
-        return {sqrt(600 * 600 / 2), -sqrt(600 * 600 / 2)};
+        return {sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2), -sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2)};
     } else if (isEqual(m_angle, 0)) {
-        return {600, 0};
+        return {SHOOTVELOCITY, 0};
     } else if (isEqual(m_angle, M_PI / 2)) {
-        return {0, 600};
+        return {0, SHOOTVELOCITY};
     } else if (isEqual(m_angle, M_PI)) {
-        return {-600, 0};
+        return {-SHOOTVELOCITY, 0};
     } else if (isEqual(m_angle, M_PI * 3 / 2)) {
-        return {0, -600};
+        return {0, -SHOOTVELOCITY};
     } else {
         return {0, -1000};
     }

@@ -43,7 +43,7 @@
 #define RIGHTPOLE 1130
 
 // constants
-static constexpr float SPEED = 120.0f;
+static constexpr float SPEED = 240.0f;
 
 void touch(bool isLeft, bool forPlayerTeam) {
   //Do something for a touch
@@ -57,9 +57,9 @@ void goal(bool isPlayerTeam) {
   //Do something for a goal
 }
 
-void checkOut(int isOut, std::vector<Player *> vec, Player *lastTouchedBy) {
+void checkOut(int isOut, std::vector<Player *> teamPlayersVec, Player *lastTouchedBy) {
   if (isOut != 0) {
-      bool isMemberOfTeam = count(vec.begin(), vec.end(), lastTouchedBy) > 0;
+      bool isMemberOfTeam = count(teamPlayersVec.begin(), teamPlayersVec.end(), lastTouchedBy) > 0;
       switch (isOut) {
         case 1 : 
           corner(0, isMemberOfTeam);
@@ -87,6 +87,14 @@ void checkOut(int isOut, std::vector<Player *> vec, Player *lastTouchedBy) {
           break;
       }
     }
+}
+
+gf::Vector2f normalizeVelocity(gf::Vector2f velocity) {
+    gf::Vector2f ret = velocity;
+    if (ret.x != 0 && ret.y != 0) {
+        ret /= sqrt(2);
+    }
+    return ret;
 }
 
 int main() {
@@ -271,142 +279,114 @@ int main() {
       window.setFullscreen(fullscreen);
     }
 
-    if ((leftAction.isActive() && rightAction.isActive()) || (!leftAction.isActive() && !rightAction.isActive())) {
-      velocity.x = 0;
-    } else {
-      if (leftAction.isActive()) {
-        velocity.x = -SPEED;
-      } else if (rightAction.isActive()) {
-        velocity.x = SPEED;
-      }
+    velocity = {0.0f, 0.0f};
+    if (leftAction.isActive()) {
+        velocity.x += -SPEED;
     }
-    
-    if ((upAction.isActive() && downAction.isActive()) || (!upAction.isActive() && !downAction.isActive())) {
-      velocity.y = 0;
-    } else {
-      if (upAction.isActive()) {
-        velocity.y = -SPEED;
-      } else if (downAction.isActive()) {
-        velocity.y = SPEED;
-      }
+    if (rightAction.isActive()) {
+        velocity.x += SPEED;
     }
 
-
+    if (upAction.isActive()) {
+        velocity.y += -SPEED;
+    }
+    if (downAction.isActive()) {
+        velocity.y += SPEED;
+    }
+    velocity = normalizeVelocity(velocity);
 
     // update
 
-if (dropAction.isActive()) {
-    ball.unlock();
-}
-
-if (ball.isLockedTo(mainPlayer)) {
-    if (passAction.isActive()) {
-        float passPower = 200.0f;
+    if (dropAction.isActive()) {
         ball.unlock();
-
-        gf::Vector2f ballPosition = ball.getPosition();
-        gf::Vector2f playerPosition = mainPlayer->getPosition();
-        if (ballPosition.y < playerPosition.y) {
-            gf::Vector2f passDirection = {0.0f, -passPower};
-            ball.setVelocity(passDirection);
-        }
-        
-        else if (ballPosition.y > playerPosition.y) {
-            gf::Vector2f passDirection = {0.0f, passPower}; 
-            ball.setVelocity(passDirection);
-        }
-        else if (ballPosition.x < playerPosition.x) {
-            gf::Vector2f passDirection = {-passPower, 0.0f};
-            ball.setVelocity(passDirection);
-        }
-        else if (ballPosition.x > playerPosition.x) {
-            gf::Vector2f passDirection = {passPower, 0.0f};
-            ball.setVelocity(passDirection);
-        }
-    }
-
-    if (shootAction.isActive()) {
-        float shootPower = 300.0f;
-        ball.unlock();
-        gf::Vector2f passDirection = {shootPower, 0.0f};
-        ball.setVelocity(passDirection);
-    }
-}
-
-
-if (switchAction.isActive()) {
-      // Switch main player between two players => to change
-      if (cam1) {
-        mainPlayer = team.getPlayers()[0];  
-      } else {
-        mainPlayer = team.getPlayers()[10]; 
-      }
-      cam1 = !cam1;
-    }
-
-    actions.reset();
-
-    gf::Time dt = clock.restart();
-    mainPlayer->setVelocity(velocity);
-
-    mainPlayer->update(dt.asSeconds());
-
-    for (auto& [player, sprite] : playerSprites) {
-      sprite.setPosition(player->getPosition());
-    }
-
-    gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
-    gf::Vector2f ballPosition = ball.getPosition();
-
-    float mainPlayerSize = mainPlayer->getSize();
-    float ballSize = mainPlayerSize;
-
-    float mainPlayerLeft = mainPlayerPosition.x;
-    float mainPlayerRight = mainPlayerPosition.x + mainPlayerSize;
-    float mainPlayerTop = mainPlayerPosition.y;
-    float mainPlayerBottom = mainPlayerPosition.y + mainPlayerSize;
-
-    float ballLeft = ballPosition.x;
-    float ballRight = ballPosition.x + ballSize;
-    float ballTop = ballPosition.y;
-    float ballBottom = ballPosition.y + ballSize;
-
-    bool isColliding = (mainPlayerRight > ballLeft && mainPlayerLeft < ballRight &&
-                        mainPlayerBottom > ballTop && mainPlayerTop < ballBottom);
-
-    if (isColliding) {
-      ball.lockTo(mainPlayer);
     }
 
     if (ball.isLockedTo(mainPlayer)) {
-      ball.setVelocity(velocity);
-    } else {
-      ball.setVelocity(ball.getVelocity());
+        if (passAction.isActive()) {
+            ball.unlock();
+            ball.setVelocity(mainPlayer->getPassVelocity());
+        }
+
+        if (shootAction.isActive()) {
+            ball.unlock();
+            ball.setVelocity(mainPlayer->getShootVelocity());
+        }
     }
 
-    ball.update(dt.asSeconds());
 
-    int out = ball.isOutOfField(FIELDXSIZE, FIELDYSIZE, LEFTPOLE, RIGHTPOLE);
+    if (switchAction.isActive()) {
+        // Switch main player between two players => to change
+        if (cam1) {
+            mainPlayer = team.getPlayers()[0];  
+        } else {
+            mainPlayer = team.getPlayers()[10]; 
+        }
+        cam1 = !cam1;
+        }
 
-    checkOut(out, team.getPlayers(), ball.getLastTouchedBy());
+        actions.reset();
 
-    view.setCenter(mainPlayer->getPosition());
-    
-    // render
-    renderer.clear();
-    //renderer.draw(sprite);
-    renderer.setView(view);
-    
-    for (auto& [player, sprite] : playerSprites) {
-      // renderer.draw(sprite);
-      player->render(renderer);
-    } 
+        gf::Time dt = clock.restart();
+        mainPlayer->setVelocity(velocity);
 
-    ball.render(renderer);
+        mainPlayer->update(dt.asSeconds());
+
+        for (auto& [player, sprite] : playerSprites) {
+        sprite.setPosition(player->getPosition());
+        }
+
+        gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
+        gf::Vector2f ballPosition = ball.getPosition();
+
+        float mainPlayerSize = mainPlayer->getSize();
+        float ballSize = mainPlayerSize;
+
+        float mainPlayerLeft = mainPlayerPosition.x;
+        float mainPlayerRight = mainPlayerPosition.x + mainPlayerSize;
+        float mainPlayerTop = mainPlayerPosition.y;
+        float mainPlayerBottom = mainPlayerPosition.y + mainPlayerSize;
+
+        float ballLeft = ballPosition.x;
+        float ballRight = ballPosition.x + ballSize;
+        float ballTop = ballPosition.y;
+        float ballBottom = ballPosition.y + ballSize;
+
+        bool isColliding = (mainPlayerRight > ballLeft && mainPlayerLeft < ballRight &&
+                            mainPlayerBottom > ballTop && mainPlayerTop < ballBottom);
+
+        if (isColliding) {
+        ball.lockTo(mainPlayer);
+        }
+
+        if (ball.isLockedTo(mainPlayer)) {
+        ball.setVelocity(velocity);
+        } else {
+        ball.setVelocity(ball.getVelocity());
+        }
+
+        ball.update(dt.asSeconds());
+
+        int out = ball.isOutOfField(FIELDXSIZE, FIELDYSIZE, LEFTPOLE, RIGHTPOLE);
+
+        checkOut(out, team.getPlayers(), ball.getLastTouchedBy());
+
+        view.setCenter(mainPlayer->getPosition());
+        
+        // render
+        renderer.clear();
+        //renderer.draw(sprite);
+        renderer.setView(view);
+        
+        for (auto& [player, sprite] : playerSprites) {
+        // renderer.draw(sprite);
+        player->render(renderer);
+        } 
+
+        ball.render(renderer);
 
 
-    renderer.display();
-  }
+        renderer.display();
+    }
 
-  return 0;
+    return 0;
 }

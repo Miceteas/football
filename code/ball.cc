@@ -35,13 +35,13 @@ void Ball::update(float dt) {
         gf::Vector2f offset = lastOffset;
 
         if (playerVelocity.x > 0.0f && playerVelocity.y > 0.0f) {
-            offset = gf::Vector2f(belongsTo->getSize(), belongsTo->getSize());
+            offset = gf::Vector2f(belongsTo->getSize()/sqrt(2), belongsTo->getSize()/sqrt(2));
         } else if (playerVelocity.x > 0.0f && playerVelocity.y < 0.0f) {
-            offset = gf::Vector2f(belongsTo->getSize(), -belongsTo->getSize());
+            offset = gf::Vector2f(belongsTo->getSize()/sqrt(2), -belongsTo->getSize()/sqrt(2));
         } else if (playerVelocity.x < 0.0f && playerVelocity.y > 0.0f) {
-            offset = gf::Vector2f(-belongsTo->getSize(), belongsTo->getSize());
+            offset = gf::Vector2f(-belongsTo->getSize()/sqrt(2), belongsTo->getSize()/sqrt(2));
         } else if (playerVelocity.x < 0.0f && playerVelocity.y < 0.0f) {
-            offset = gf::Vector2f(-belongsTo->getSize(), -belongsTo->getSize());
+            offset = gf::Vector2f(-belongsTo->getSize()/sqrt(2), -belongsTo->getSize()/sqrt(2));
         } else if (playerVelocity.x > 0.0f) {
             offset = gf::Vector2f(belongsTo->getSize(), 0.0f);
         } else if (playerVelocity.x < 0.0f) {
