@@ -57,6 +57,10 @@ void Player::update(float dt) {
     m_position += dt * m_velocity;
 }
 
+gf::Vector2f Player::getVelocity() const {
+    return m_velocity;
+}
+
 void Player::render(gf::RenderTarget& target) {
     gf::RectangleShape shape({m_size, m_size});
     shape.setPosition(m_position);

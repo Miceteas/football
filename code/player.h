@@ -26,7 +26,6 @@ class Player : public gf::Entity {
 
     float getSize() const;
     gf::Vector2f getPosition() const;
-    /*--------------------*/
     gf::Vector2f getVelocity() const;
 
     void setPosition(gf::Vector2f position);

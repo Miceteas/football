@@ -22,25 +22,49 @@ float Ball::getSize() const {
 void Ball::setVelocity(gf::Vector2f velocity) {
     m_velocity = velocity;
 }
-/*
-void Ball::update(float dt) {
-    m_position += m_velocity * dt;
-
-}*/
-
 
 void Ball::update(float dt) {
     --m_cooldown;
     static constexpr float friction = 150.0f;
+    static gf::Vector2f lastOffset(0.0f, 0.0f);
     float speed = std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y);
 
-    if (std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y) < 0.1f) {
-        m_velocity = {0.0f, 0.0f};
+    if (belongsTo != nullptr) {
+        gf::Vector2f playerVelocity = belongsTo->getVelocity();
+        gf::Vector2f playerPosition = belongsTo->getPosition();
+        gf::Vector2f offset = lastOffset;
+
+        if (playerVelocity.x > 0.0f && playerVelocity.y > 0.0f) {
+            offset = gf::Vector2f(belongsTo->getSize(), belongsTo->getSize());
+        } else if (playerVelocity.x > 0.0f && playerVelocity.y < 0.0f) {
+            offset = gf::Vector2f(belongsTo->getSize(), -belongsTo->getSize());
+        } else if (playerVelocity.x < 0.0f && playerVelocity.y > 0.0f) {
+            offset = gf::Vector2f(-belongsTo->getSize(), belongsTo->getSize());
+        } else if (playerVelocity.x < 0.0f && playerVelocity.y < 0.0f) {
+            offset = gf::Vector2f(-belongsTo->getSize(), -belongsTo->getSize());
+        } else if (playerVelocity.x > 0.0f) {
+            offset = gf::Vector2f(belongsTo->getSize(), 0.0f);
+        } else if (playerVelocity.x < 0.0f) {
+            offset = gf::Vector2f(-belongsTo->getSize(), 0.0f);
+        } else if (playerVelocity.y > 0.0f) {
+            offset = gf::Vector2f(0.0f, belongsTo->getSize());
+        } else if (playerVelocity.y < 0.0f) {
+            offset = gf::Vector2f(0.0f, -belongsTo->getSize());
+        }
+
+        if (playerVelocity.x != 0.0f || playerVelocity.y != 0.0f) {
+            lastOffset = offset;
+        }
+
+        m_position = playerPosition + lastOffset;
+        m_velocity = playerVelocity;
+        return;
     }
+
     if (speed > 0.001f) {
         float deceleration = belongsTo == nullptr ? (friction * dt) : 0;
         speed = std::max(speed - deceleration, 0.0f);
-        
+
         if (speed > 0.0f) {
             m_velocity = m_velocity / std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y) * speed;
         } else {
@@ -52,9 +76,6 @@ void Ball::update(float dt) {
 
     m_position += m_velocity * dt;
 }
-
-
-
 
 void Ball::lockTo(Player *p) {
     if (m_cooldown <= 0) {
