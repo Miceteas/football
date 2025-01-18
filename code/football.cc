@@ -41,6 +41,9 @@
 #define FIELDYSIZE 2040
 #define LEFTPOLE 910
 #define RIGHTPOLE 1130
+#define FIELD_X_TILES 25
+#define FIELD_Y_TILES 13
+#define TILESIZE 64
 
 // constants
 static constexpr float SPEED = 240.0f;
@@ -229,11 +232,245 @@ int main() {
     gf::Texture playerTexture("../assets/PNG/Blue/characterBlue (1).png");
     playerTextures.push_back(std::move(playerTexture));
 
+    const std::string fieldTextureBasePath = "../assets/GrassGroundTiles/tile";
+
+    std::vector<gf::Texture> fieldTextures;
+    for (int i = 0; i <= 207; ++i) {
+        std::string filename = fieldTextureBasePath + (i < 10 ? "00" : (i < 100 ? "0" : "")) + std::to_string(i) + ".png";
+        fieldTextures.emplace_back(std::move(filename));
+    }
+
+    std::vector<gf::Sprite> fieldSprites;
+
+    for (size_t i = 0; i < fieldTextures.size(); ++i) {
+        gf::Sprite sprite;
+        sprite.setTexture(fieldTextures[i]);
+        sprite.setScale({TILESIZE / fieldTextures[i].getSize().x, TILESIZE / fieldTextures[i].getSize().y});
+        fieldSprites.push_back(sprite);
+    }
+
+
+
+
+
+
+
+    // Initialize the field
+    std::vector<gf::Sprite> field;
+    /////////////////1//////////////////////
+    field.push_back(fieldSprites[5]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[2]);
+    }
+    field.push_back(fieldSprites[3]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[2]);
+    }
+    field.push_back(fieldSprites[6]);
+    ////////////////2///////////////////////
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[16]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+    ////////////////3///////////////////////
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[16]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+    ///////////////4////////////////////////
+    field.push_back(fieldSprites[27]);
+    field.push_back(fieldSprites[29]);
+    field.push_back(fieldSprites[29]);
+    field.push_back(fieldSprites[37]);
+    for (size_t i = 0; i < 8; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[16]);
+    for (size_t i = 0; i < 8; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[36]);
+    field.push_back(fieldSprites[29]);
+    field.push_back(fieldSprites[29]);
+    field.push_back(fieldSprites[30]);
+    ////////////////5///////////////////////
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 2; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+    field.push_back(fieldSprites[99]);
+    for (size_t i = 0; i < 7; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[16]);
+    for (size_t i = 0; i < 7; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[95]);
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 2; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+    ////////////////6///////////////////////
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 2; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+    field.push_back(fieldSprites[112]);
+    for (size_t i = 0; i < 6; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[7]);
+    field.push_back(fieldSprites[46]);
+    field.push_back(fieldSprites[9]);
+    for (size_t i = 0; i < 6; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[108]);
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 2; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+    ////////////////7///////////////////////
+    field.push_back(fieldSprites[14]);
     
+    field.push_back(fieldSprites[0]);
+    field.push_back(fieldSprites[13]);
+    
+    field.push_back(fieldSprites[17]);
+    field.push_back(fieldSprites[125]);
+    for (size_t i = 0; i < 6; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[20]);
+    field.push_back(fieldSprites[15]);
+    field.push_back(fieldSprites[22]);
+
+    for (size_t i = 0; i < 6; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[121]);
+    field.push_back(fieldSprites[14]);
+    field.push_back(fieldSprites[0]);
+    field.push_back(fieldSprites[13]);
+    field.push_back(fieldSprites[17]);
+
+    /////////////////8//////////////////////
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 2; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+    field.push_back(fieldSprites[138]);
+    for (size_t i = 0; i < 6; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[33]);
+    field.push_back(fieldSprites[48]);
+    field.push_back(fieldSprites[35]);
+    for (size_t i = 0; i < 6; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[134]);//
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 2; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+
+    //////////////////9/////////////////////
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 2; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+    field.push_back(fieldSprites[151]);//
+    for (size_t i = 0; i < 7; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[16]);
+    for (size_t i = 0; i < 7; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[147]);//
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 2; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+    ///////////////10/////////////////////
+    field.push_back(fieldSprites[27]);
+    field.push_back(fieldSprites[29]);
+    field.push_back(fieldSprites[29]);
+    field.push_back(fieldSprites[50]);//
+    for (size_t i = 0; i < 8; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[16]);
+    for (size_t i = 0; i < 8; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[49]);//
+    field.push_back(fieldSprites[29]);
+    field.push_back(fieldSprites[29]);
+    field.push_back(fieldSprites[30]);
+    ///////////////11/////////////////////
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[16]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+    ///////////////12/////////////////////
+    field.push_back(fieldSprites[14]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[16]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[0]);
+    }
+    field.push_back(fieldSprites[17]);
+    ///////////////13/////////////////////
+    field.push_back(fieldSprites[18]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[41]);
+    }
+    field.push_back(fieldSprites[42]);
+    for (size_t i = 0; i < 11; ++i) {
+        field.push_back(fieldSprites[41]);
+    }
+    field.push_back(fieldSprites[19]);
+
+    for (size_t i = 0; i < field.size(); ++i) {
+        float x = (i % FIELD_X_TILES) * TILESIZE; 
+        float y = (i / FIELD_X_TILES) * TILESIZE; 
+
+        field[i].setPosition({x, y});
+    }
+    
+    //////////////////////////////////////////////////////////
     
 
     // default setup
-    team.setupPlayers(window.getSize().x,window.getSize().y);
+    team.setupPlayers(FIELD_X_TILES*TILESIZE,FIELD_Y_TILES*TILESIZE);
 
     std::unordered_map<Player*, gf::Sprite> playerSprites;
 
@@ -249,8 +486,9 @@ int main() {
     // Add team players to the mainEntities
     
     
-
-    Ball ball(BALLSIZE, {200.0f, 20.0f}, gf::Color::Rose);
+    float x = (13 % FIELD_X_TILES) * TILESIZE - TILESIZE/2; 
+    float y = (FIELD_Y_TILES*TILESIZE)/2;
+    Ball ball(TILESIZE/5, {x, y}, gf::Color::Rose);
     mainEntities.addEntity(ball);
     
     gf::Vector2f velocity(0.0f, 0.0f);
@@ -376,11 +614,16 @@ int main() {
         renderer.clear();
         //renderer.draw(sprite);
         renderer.setView(view);
+
+        for(auto fsprite : field) {
+            renderer.draw(fsprite);
+        }
         
         for (auto& [player, sprite] : playerSprites) {
             // renderer.draw(sprite);
             player->render(renderer);
-        } 
+        }
+
 
         ball.render(renderer);
 
