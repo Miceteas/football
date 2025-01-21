@@ -35,9 +35,18 @@ class Player : public gf::Entity {
     float getAngle();
     gf::Vector2f getPassVelocity();
     gf::Vector2f getShootVelocity();
-    /*---------------------------------*/
-    void makePass(gf::Vector2f direction);
-
+    
+    float m_freezeTime;
+    bool m_isTackling;
+    float m_slideDistance;
+    bool collidesWith(const Player& other) const;
+    void tackle();
+    void freeze(float duration);
+    bool isTackling() const;
+    void setTackleData(float speed, float angle);
+    float m_tackleSpeed;
+    float m_tackleAngle;
+    gf::Vector2f m_tackleVelocity;
 };
 
 #endif

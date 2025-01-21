@@ -551,8 +551,20 @@ int main() {
         }
     }
 
+    if (tackleAction.isActive() && !mainPlayer->isTackling() &&  !ball.isLockedTo(mainPlayer)) {
+       mainPlayer->setTackleData(300.0f, mainPlayer->getAngle()); 
+    }
 
-    if (switchAction.isActive()) {
+    if (mainPlayer->isTackling()) {
+        for (Player* player : team.getPlayers()) {
+            if (player != mainPlayer && mainPlayer->collidesWith(*player)) {
+                player->freeze(1.0f);
+            }
+        }
+    }
+
+
+    if (switchAction.isActive() && !mainPlayer->isTackling()) {
         // Switch main player between two players => to change
         if (cam1) {
             mainPlayer = team.getPlayers()[0];  
