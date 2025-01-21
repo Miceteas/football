@@ -24,39 +24,18 @@ void Ball::setVelocity(gf::Vector2f velocity) {
 }
 
 void Ball::update(float dt) {
-    --m_cooldown;
+    if (m_cooldown > 0) {
+        --m_cooldown;
+    }
     static constexpr float friction = 150.0f;
-    static gf::Vector2f lastOffset(0.0f, 0.0f);
     float speed = std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y);
 
     if (belongsTo != nullptr) {
         gf::Vector2f playerVelocity = belongsTo->getVelocity();
         gf::Vector2f playerPosition = belongsTo->getPosition();
-        gf::Vector2f offset = lastOffset;
+        gf::Vector2f offset(cos(belongsTo->getAngle()) * belongsTo->getSize(), sin(belongsTo->getAngle()) * belongsTo->getSize());
 
-        if (playerVelocity.x > 0.0f && playerVelocity.y > 0.0f) {
-            offset = gf::Vector2f(belongsTo->getSize()/sqrt(2), belongsTo->getSize()/sqrt(2));
-        } else if (playerVelocity.x > 0.0f && playerVelocity.y < 0.0f) {
-            offset = gf::Vector2f(belongsTo->getSize()/sqrt(2), -belongsTo->getSize()/sqrt(2));
-        } else if (playerVelocity.x < 0.0f && playerVelocity.y > 0.0f) {
-            offset = gf::Vector2f(-belongsTo->getSize()/sqrt(2), belongsTo->getSize()/sqrt(2));
-        } else if (playerVelocity.x < 0.0f && playerVelocity.y < 0.0f) {
-            offset = gf::Vector2f(-belongsTo->getSize()/sqrt(2), -belongsTo->getSize()/sqrt(2));
-        } else if (playerVelocity.x > 0.0f) {
-            offset = gf::Vector2f(belongsTo->getSize(), 0.0f);
-        } else if (playerVelocity.x < 0.0f) {
-            offset = gf::Vector2f(-belongsTo->getSize(), 0.0f);
-        } else if (playerVelocity.y > 0.0f) {
-            offset = gf::Vector2f(0.0f, belongsTo->getSize());
-        } else if (playerVelocity.y < 0.0f) {
-            offset = gf::Vector2f(0.0f, -belongsTo->getSize());
-        }
-
-        if (playerVelocity.x != 0.0f || playerVelocity.y != 0.0f) {
-            lastOffset = offset;
-        }
-
-        m_position = playerPosition + lastOffset;
+        m_position = playerPosition + offset;
         m_velocity = playerVelocity;
         return;
     }
@@ -86,7 +65,7 @@ void Ball::lockTo(Player *p) {
 
 void Ball::unlock() {
     belongsTo = nullptr;
-    m_cooldown = 5;
+    m_cooldown = 10;
 }
 
 bool Ball::isLockedTo(Player *p) const {
@@ -111,29 +90,38 @@ Player *Ball::getLastTouchedBy() {
     return lastTouchedBy;
 }
 
-int Ball::isOutOfField(int xsize, int ysize, int leftPole, int rightPole) {
-    if (m_position.y + m_size < 0) {
-        if (m_position.x + m_size < leftPole) {
+int Ball::isOutOfField(int xsize, int ysize, int topPole, int bottomPole) {
+    if (m_position.x + m_size < 0) {
+        if (m_position.y + m_size < topPole) {
+            //Corner on topleft
             return 1;
-        }else if (m_position.x - m_size > rightPole) {
+        }else if (m_position.y - m_size > bottomPole) {
+            //Corner on bottomleft
             return 3;
         }else {
+            //Goal against left team
             return 2;
         }
-    }else if (m_position.y - m_size > ysize) {
-        if (m_position.x + m_size < leftPole) {
+    }else if (m_position.x - m_size > xsize) {
+        if (m_position.y + m_size < topPole) {
+            //Corner on topright
             return 6;
-        }else if (m_position.x - m_size > rightPole) {
+        }else if (m_position.y - m_size > bottomPole) {
+            //Corner on bottomright
             return 8;
         }else {
+            //Goal against right team
             return 7;
         }
     }else {
-        if (m_position.x + m_size < 0) {
+        if (m_position.y + m_size < 0) {
+            //Touch on top side
             return 4;
-        }else if (m_position.x - m_size > xsize) {
+        }else if (m_position.y - m_size > ysize) {
+            //Touch on bottom side
             return 5;
         }else {
+            //Not out of field
             return 0;
         }
     }

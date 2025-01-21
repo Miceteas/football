@@ -153,45 +153,15 @@ float Player::getAngle() {
 }
 
 gf::Vector2f Player::getPassVelocity() {
-    if (isEqual(m_angle, M_PI / 4)) {
-        return {sqrt(PASSVELOCITY * PASSVELOCITY / 2), sqrt(PASSVELOCITY * PASSVELOCITY / 2)};
-    } else if (isEqual(m_angle, M_PI * 3 / 4)) {
-        return {-sqrt(PASSVELOCITY * PASSVELOCITY / 2), sqrt(PASSVELOCITY * PASSVELOCITY / 2)};
-    } else if (isEqual(m_angle, M_PI * 5 / 4)) {
-        return {-sqrt(PASSVELOCITY * PASSVELOCITY / 2), -sqrt(PASSVELOCITY * PASSVELOCITY / 2)};
-    } else if (isEqual(m_angle, M_PI * 7 / 4)) {
-        return {sqrt(PASSVELOCITY * PASSVELOCITY / 2), -sqrt(PASSVELOCITY * PASSVELOCITY / 2)};
-    } else if (isEqual(m_angle, 0)) {
-        return {PASSVELOCITY, 0};
-    } else if (isEqual(m_angle, M_PI / 2)) {
-        return {0, PASSVELOCITY};
-    } else if (isEqual(m_angle, M_PI)) {
-        return {-PASSVELOCITY, 0};
-    } else if (isEqual(m_angle, M_PI * 3 / 2)) {
-        return {0, -PASSVELOCITY};
-    } else {
-        return {0, -1000};
-    }
+    return {cos(m_angle) * PASSVELOCITY, sin(m_angle) * PASSVELOCITY};
 }
 
 gf::Vector2f Player::getShootVelocity() {
-    if (isEqual(m_angle, M_PI / 4)) {
-        return {sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2), sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2)};
-    } else if (isEqual(m_angle, M_PI * 3 / 4)) {
-        return {-sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2), sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2)};
-    } else if (isEqual(m_angle, M_PI * 5 / 4)) {
-        return {-sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2), -sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2)};
-    } else if (isEqual(m_angle, M_PI * 7 / 4)) {
-        return {sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2), -sqrt(SHOOTVELOCITY * SHOOTVELOCITY / 2)};
-    } else if (isEqual(m_angle, 0)) {
-        return {SHOOTVELOCITY, 0};
-    } else if (isEqual(m_angle, M_PI / 2)) {
-        return {0, SHOOTVELOCITY};
-    } else if (isEqual(m_angle, M_PI)) {
-        return {-SHOOTVELOCITY, 0};
-    } else if (isEqual(m_angle, M_PI * 3 / 2)) {
-        return {0, -SHOOTVELOCITY};
-    } else {
-        return {0, -1000};
-    }
+    return {cos(m_angle) * SHOOTVELOCITY, sin(m_angle) * SHOOTVELOCITY};
+}
+
+//TEMPORARY 
+
+void Player::changeColor(gf::Color4f color) {
+    m_color = color;
 }

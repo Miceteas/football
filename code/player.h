@@ -47,6 +47,9 @@ class Player : public gf::Entity {
     float m_tackleSpeed;
     float m_tackleAngle;
     gf::Vector2f m_tackleVelocity;
+
+    //TEMPORARY
+    void changeColor(gf::Color4f color);
 };
 
 #endif

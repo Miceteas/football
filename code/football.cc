@@ -37,25 +37,28 @@
 
 #define BALLSIZE 10
 #define PLAYERSIZE 30
-#define FIELDXSIZE 3150
-#define FIELDYSIZE 2040
-#define LEFTPOLE 910
-#define RIGHTPOLE 1130
+#define FIELDXSIZE 3200
+#define FIELDYSIZE 1664
+#define TOPPOLE 512
+#define BOTTOMPOLE 1152
 #define FIELD_X_TILES 25
 #define FIELD_Y_TILES 13
-#define TILESIZE 64
+#define TILESIZE 128
 
 // constants
 static constexpr float SPEED = 240.0f;
 
-void touch(bool isLeft, bool forPlayerTeam) {
+void touch(bool isTop, bool forPlayerTeam) {
   //Do something for a touch
 }
 
 void corner(int side, bool forPlayerTeam) {
-  //Do something for a corner (0 = topleft, 1 = topright, 2 = bottomleft, 3 = bottomright)
+  //Do something for a corner (0 = topleft, 1 = bottomright, 2 = topleft, 3 = bottomright)
 }
 
+/**
+ * @param bool isPlayerTeam true if the goal was made against the team of the player (left)
+ */
 void goal(bool isPlayerTeam) {
   //Do something for a goal
 }
@@ -66,28 +69,40 @@ void checkOut(int isOut, std::vector<Player *> teamPlayersVec, Player *lastTouch
         switch (isOut) {
             case 1 : 
                 corner(0, isMemberOfTeam);
+                lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
             case 2 : 
                 goal(true);
+                lastTouchedBy->changeColor(gf::Color::Red);
                 break;
             case 3 : 
                 corner(1, isMemberOfTeam);
+                lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
             case 4 : 
                 touch(true, isMemberOfTeam);
+                lastTouchedBy->changeColor(gf::Color::Violet);
                 break;
             case 5 : 
                 touch(false, isMemberOfTeam);
+                lastTouchedBy->changeColor(gf::Color::Violet);
                 break;
             case 6 :
                 corner(2, isMemberOfTeam);
+                lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
             case 7 : 
                 goal(false);
+                lastTouchedBy->changeColor(gf::Color::Red);
                 break;
             case 8 :
                 corner(3, isMemberOfTeam);
+                lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
+        }
+    }else {
+        if (lastTouchedBy != nullptr) {
+            lastTouchedBy->changeColor(gf::Color::Azure);
         }
     }
 }
@@ -100,164 +115,8 @@ gf::Vector2f normalizeVelocity(gf::Vector2f velocity) {
     return ret;
 }
 
-int main() {
-    static constexpr gf::Vector2u ScreenSize(800, 800);
-
-    gf::Log::setLevel(gf::Log::Info);
-
-    // setup resource directory
-    gf::ResourceManager resourceManager;
-    resourceManager.addSearchDir(FOOTBALL_DATA_DIR);
-    //resourceManager.addSearchDir("./assets");
-
-    gf::Random random;
-
-    // initialize window
-    gf::Window window("gf football", ScreenSize, ~gf::WindowHints::Resizable);
-    window.setVerticalSyncEnabled(true);
-    window.setFramerateLimit(60);
-
-    gf::RenderWindow renderer(window);
-
-    gf::Vector2u windowSize = window.getSize();
-
-    // add cameras
-    gf::ViewContainer views;
-    gf::ExtendView view({0.0f, 20.0f}, {float(window.getSize().x), float(window.getSize().y)});
-    views.addView(view);
-    views.setInitialFramebufferSize(window.getSize());
-
-    // add actions
-    gf::ActionContainer actions;
-
-    gf::Action closeWindowAction("Close window");
-    closeWindowAction.addCloseControl();
-    closeWindowAction.addKeycodeKeyControl(gf::Keycode::Escape);
-    actions.addAction(closeWindowAction);
-
-    gf::Action fullscreenAction("Fullscreen");
-    fullscreenAction.addKeycodeKeyControl(gf::Keycode::F);
-    actions.addAction(fullscreenAction);
-
-    gf::Action leftAction("Left");
-    leftAction.addScancodeKeyControl(gf::Scancode::A);
-    leftAction.addScancodeKeyControl(gf::Scancode::Q);
-    leftAction.addScancodeKeyControl(gf::Scancode::Left);
-    leftAction.setContinuous();
-    actions.addAction(leftAction);
-
-    gf::Action rightAction("Right");
-    rightAction.addScancodeKeyControl(gf::Scancode::D);
-    rightAction.addScancodeKeyControl(gf::Scancode::Right);
-    rightAction.setContinuous();
-    actions.addAction(rightAction);
-
-    gf::Action upAction("Up");
-    upAction.addScancodeKeyControl(gf::Scancode::W);
-    upAction.addScancodeKeyControl(gf::Scancode::Z);
-    upAction.addScancodeKeyControl(gf::Scancode::Up);
-    upAction.setContinuous();
-    actions.addAction(upAction);
-
-    gf::Action downAction("Down");
-    downAction.addScancodeKeyControl(gf::Scancode::S);
-    downAction.addScancodeKeyControl(gf::Scancode::Down);
-    downAction.setContinuous();
-    actions.addAction(downAction);
-
-    gf::Action dropAction("Drop");
-    dropAction.addScancodeKeyControl(gf::Scancode::X);
-    actions.addAction(dropAction);
-
-    gf::Action switchAction("Switch");
-    switchAction.addScancodeKeyControl(gf::Scancode::C);
-    actions.addAction(switchAction);
-
-    gf::Action passAction("Pass");
-    passAction.addScancodeKeyControl(gf::Scancode::V); 
-    actions.addAction(passAction);
-
-    gf::Action shootAction("Shoot");
-    shootAction.addScancodeKeyControl(gf::Scancode::Space); 
-    actions.addAction(shootAction);
-
-    gf::Action tackleAction("Tackle");
-    tackleAction.addScancodeKeyControl(gf::Scancode::E); 
-    actions.addAction(tackleAction);
-
-    gf::Action sprintAction("Sprint");
-    sprintAction.addScancodeKeyControl(gf::Scancode::B); 
-    actions.addAction(sprintAction);
-
-
-    // add entities
-    gf::EntityContainer mainEntities;
-
-    gf::Texture grassTexture("../assets/Tilesheet/groundGrass.png");
-    gf::Sprite sprite;
-
-    sprite.setTexture(grassTexture);
-
-    gf::Vector2f scale(
-        float(window.getSize().x) / grassTexture.getSize().x,
-        float(window.getSize().y) / grassTexture.getSize().y
-    );
-    
-    sprite.setScale(scale);
-    sprite.setPosition({0.0f, float(window.getSize().x)});
-
-    //renderer.draw(sprite);
-
-    gf::Clock clock;
-    bool fullscreen = false;
-
-    // Initialize a team with 11 players
-    Team team("Team A", gf::Color::Azure);
-    team.initPlayers();  // Initialize the players
-
-    // Texture players
-    /*gf::Texture texture("../assets/PNG/Blue/characterBlue(1).png") ;
-
-    gf::Sprite playerSprite;
-    playerSprite.setTexture(texture);*/
-
-    const std::string playerTexturesBasePath = "../assets/PNG/Blue/characterBlue (";
-    std::vector<gf::Texture> playerTextures;
-
-    for (int i = 1; i <= 10; ++i) {
-        gf::Texture texture(playerTexturesBasePath + std::to_string(i) + ").png");
-        playerTextures.push_back(std::move(texture));
-    }
-
-    gf::Texture playerTexture("../assets/PNG/Blue/characterBlue (1).png");
-    playerTextures.push_back(std::move(playerTexture));
-
-    const std::string fieldTextureBasePath = "../assets/GrassGroundTiles/tile";
-
-    std::vector<gf::Texture> fieldTextures;
-    for (int i = 0; i <= 207; ++i) {
-        std::string filename = fieldTextureBasePath + (i < 10 ? "00" : (i < 100 ? "0" : "")) + std::to_string(i) + ".png";
-        fieldTextures.emplace_back(std::move(filename));
-    }
-
-    std::vector<gf::Sprite> fieldSprites;
-
-    for (size_t i = 0; i < fieldTextures.size(); ++i) {
-        gf::Sprite sprite;
-        sprite.setTexture(fieldTextures[i]);
-        sprite.setScale({TILESIZE / fieldTextures[i].getSize().x, TILESIZE / fieldTextures[i].getSize().y});
-        fieldSprites.push_back(sprite);
-    }
-
-
-
-
-
-
-
-    // Initialize the field
+std::vector<gf::Sprite> createField(std::vector<gf::Sprite> fieldSprites) {
     std::vector<gf::Sprite> field;
-    /////////////////1//////////////////////
     field.push_back(fieldSprites[5]);
     for (size_t i = 0; i < 11; ++i) {
         field.push_back(fieldSprites[2]);
@@ -465,6 +324,168 @@ int main() {
 
         field[i].setPosition({x, y});
     }
+    return field;
+}
+
+int main() {
+    static constexpr gf::Vector2u ScreenSize(800, 800);
+
+    gf::Log::setLevel(gf::Log::Info);
+
+    // setup resource directory
+    gf::ResourceManager resourceManager;
+    resourceManager.addSearchDir(FOOTBALL_DATA_DIR);
+    //resourceManager.addSearchDir("./assets");
+
+    gf::Random random;
+
+    // initialize window
+    gf::Window window("gf football", ScreenSize, ~gf::WindowHints::Resizable);
+    window.setVerticalSyncEnabled(true);
+    window.setFramerateLimit(60);
+
+    gf::RenderWindow renderer(window);
+
+    gf::Vector2u windowSize = window.getSize();
+
+    // add cameras
+    gf::ViewContainer views;
+    gf::ExtendView view({0.0f, 20.0f}, {float(window.getSize().x), float(window.getSize().y)});
+    views.addView(view);
+    views.setInitialFramebufferSize(window.getSize());
+
+    // add actions
+    gf::ActionContainer actions;
+
+    gf::Action closeWindowAction("Close window");
+    closeWindowAction.addCloseControl();
+    closeWindowAction.addKeycodeKeyControl(gf::Keycode::Escape);
+    actions.addAction(closeWindowAction);
+
+    gf::Action fullscreenAction("Fullscreen");
+    fullscreenAction.addKeycodeKeyControl(gf::Keycode::F);
+    actions.addAction(fullscreenAction);
+
+    gf::Action leftAction("Left");
+    leftAction.addScancodeKeyControl(gf::Scancode::A);
+    leftAction.addScancodeKeyControl(gf::Scancode::Q);
+    leftAction.addScancodeKeyControl(gf::Scancode::Left);
+    leftAction.setContinuous();
+    actions.addAction(leftAction);
+
+    gf::Action rightAction("Right");
+    rightAction.addScancodeKeyControl(gf::Scancode::D);
+    rightAction.addScancodeKeyControl(gf::Scancode::Right);
+    rightAction.setContinuous();
+    actions.addAction(rightAction);
+
+    gf::Action upAction("Up");
+    upAction.addScancodeKeyControl(gf::Scancode::W);
+    upAction.addScancodeKeyControl(gf::Scancode::Z);
+    upAction.addScancodeKeyControl(gf::Scancode::Up);
+    upAction.setContinuous();
+    actions.addAction(upAction);
+
+    gf::Action downAction("Down");
+    downAction.addScancodeKeyControl(gf::Scancode::S);
+    downAction.addScancodeKeyControl(gf::Scancode::Down);
+    downAction.setContinuous();
+    actions.addAction(downAction);
+
+    gf::Action dropAction("Drop");
+    dropAction.addScancodeKeyControl(gf::Scancode::X);
+    actions.addAction(dropAction);
+
+    gf::Action switchAction("Switch");
+    switchAction.addScancodeKeyControl(gf::Scancode::C);
+    actions.addAction(switchAction);
+
+    gf::Action passAction("Pass");
+    passAction.addScancodeKeyControl(gf::Scancode::V); 
+    actions.addAction(passAction);
+
+    gf::Action shootAction("Shoot");
+    shootAction.addScancodeKeyControl(gf::Scancode::Space); 
+    actions.addAction(shootAction);
+
+    gf::Action tackleAction("Tackle");
+    tackleAction.addScancodeKeyControl(gf::Scancode::E); 
+    actions.addAction(tackleAction);
+
+    gf::Action sprintAction("Sprint");
+    sprintAction.addScancodeKeyControl(gf::Scancode::B); 
+    actions.addAction(sprintAction);
+
+
+    // add entities
+    gf::EntityContainer mainEntities;
+
+    gf::Texture grassTexture("../assets/Tilesheet/groundGrass.png");
+    gf::Sprite sprite;
+
+    sprite.setTexture(grassTexture);
+
+    gf::Vector2f scale(
+        float(window.getSize().x) / grassTexture.getSize().x,
+        float(window.getSize().y) / grassTexture.getSize().y
+    );
+    
+    sprite.setScale(scale);
+    sprite.setPosition({0.0f, float(window.getSize().x)});
+
+    //renderer.draw(sprite);
+
+    gf::Clock clock;
+    bool fullscreen = false;
+
+    // Initialize a team with 11 players
+    Team team("Team A", gf::Color::Azure);
+    team.initPlayers();  // Initialize the players
+
+    // Texture players
+    /*gf::Texture texture("../assets/PNG/Blue/characterBlue(1).png") ;
+
+    gf::Sprite playerSprite;
+    playerSprite.setTexture(texture);*/
+
+    const std::string playerTexturesBasePath = "../assets/PNG/Blue/characterBlue (";
+    std::vector<gf::Texture> playerTextures;
+
+    for (int i = 1; i <= 10; ++i) {
+        gf::Texture texture(playerTexturesBasePath + std::to_string(i) + ").png");
+        playerTextures.push_back(std::move(texture));
+    }
+
+    gf::Texture playerTexture("../assets/PNG/Blue/characterBlue (1).png");
+    playerTextures.push_back(std::move(playerTexture));
+
+    const std::string fieldTextureBasePath = "../assets/GrassGroundTiles/tile";
+
+    std::vector<gf::Texture> fieldTextures;
+    for (int i = 0; i <= 207; ++i) {
+        std::string filename = fieldTextureBasePath + (i < 10 ? "00" : (i < 100 ? "0" : "")) + std::to_string(i) + ".png";
+        fieldTextures.emplace_back(std::move(filename));
+    }
+
+    std::vector<gf::Sprite> fieldSprites;
+
+    for (size_t i = 0; i < fieldTextures.size(); ++i) {
+        gf::Sprite sprite;
+        sprite.setTexture(fieldTextures[i]);
+        sprite.setScale({(float)TILESIZE / fieldTextures[i].getSize().x, (float)TILESIZE / fieldTextures[i].getSize().y});
+        fieldSprites.push_back(sprite);
+    }
+
+
+
+
+
+
+
+    // Initialize the field
+    std::vector<gf::Sprite> field = createField(fieldSprites);
+    /////////////////1//////////////////////
+    
     
     //////////////////////////////////////////////////////////
     
@@ -488,7 +509,7 @@ int main() {
     
     float x = (13 % FIELD_X_TILES) * TILESIZE - TILESIZE/2; 
     float y = (FIELD_Y_TILES*TILESIZE)/2;
-    Ball ball(TILESIZE/5, {x, y}, gf::Color::Rose);
+    Ball ball(TILESIZE/10, {x, y}, gf::Color::Rose);
     mainEntities.addEntity(ball);
     
     gf::Vector2f velocity(0.0f, 0.0f);
@@ -552,7 +573,7 @@ int main() {
     }
 
     if (tackleAction.isActive() && !mainPlayer->isTackling() &&  !ball.isLockedTo(mainPlayer)) {
-       mainPlayer->setTackleData(300.0f, mainPlayer->getAngle()); 
+       mainPlayer->setTackleData(400.0f, mainPlayer->getAngle()); 
     }
 
     if (mainPlayer->isTackling()) {
@@ -616,7 +637,7 @@ int main() {
 
         ball.update(dt.asSeconds());
 
-        int out = ball.isOutOfField(FIELDXSIZE, FIELDYSIZE, LEFTPOLE, RIGHTPOLE);
+        int out = ball.isOutOfField(FIELDXSIZE, FIELDYSIZE, TOPPOLE, BOTTOMPOLE);
 
         checkOut(out, team.getPlayers(), ball.getLastTouchedBy());
 
