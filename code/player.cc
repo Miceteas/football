@@ -1,18 +1,25 @@
 #include "player.h"
 
-#define PASSVELOCITY 300
-#define SHOOTVELOCITY 600
+#define PASS_VELOCITY 300
+#define SHOOT_VELOCITY 600
+#define SLIDE_DISTANCE 150.0f
+#define TACKLE_FRICTION 150.0f
+#define MIN_SLIDE_SPEED 5.0f
 
 Player::Player(float stamina, float size, gf::Vector2f position, Role role, gf::Color4f color, float angle)
 : m_stamina(stamina)
 , m_velocity({0, 0})
 , m_size(size)
 , m_position(position)
-, m_color(color)
 , m_role(role)
+, m_color(color)
 , m_angle(angle)
-, m_isTackling(false)
 , m_freezeTime(0.0f)
+, m_isTackling(false)
+, m_slideDistance(SLIDE_DISTANCE)
+, m_tackleSpeed(0.0f)
+, m_tackleAngle(0.0f)
+, m_tackleVelocity({0, 0}) 
 {
     
 }
@@ -25,28 +32,15 @@ gf::Vector2f Player::getPosition() const {
     return m_position;
 }
 
+gf::Vector2f Player::getVelocity() const {
+    return m_velocity;
+}
+
 float Player::calcAngle(gf::Vector2f velocity) {
-    float ang = m_angle;
-    if (velocity.x > 0 && velocity.y > 0) {
-        ang = M_PI / 4;
-    } else if (velocity.x > 0 && velocity.y < 0) {
-        ang = M_PI * 7 / 4;
-    } else if (velocity.x < 0 && velocity.y > 0) {
-        ang = M_PI * 3 / 4;
-    } else if (velocity.x < 0 && velocity.y < 0) {
-        ang = M_PI * 5 / 4;
-    } else if (velocity.x > 0 && velocity.y == 0) {
-        ang = 0;
-    } else if (velocity.x < 0 && velocity.y == 0) {
-        ang = M_PI;
-    } else if (velocity.x == 0 && velocity.y > 0) {
-        ang = M_PI / 2;
-    } else if (velocity.x == 0 && velocity.y < 0) {
-        ang = M_PI * 3 / 2;
-    } else {
-        ang = m_angle;
+    if (velocity.x == 0 && velocity.y == 0) {
+        return m_angle;
     }
-    return ang;
+    return std::atan2(velocity.y, velocity.x);
 }
 
 void Player::setVelocity(gf::Vector2f velocity) {
@@ -63,13 +57,12 @@ void Player::setTackleData(float speed, float angle) {
     m_tackleAngle = angle;
     m_tackleVelocity = {speed * std::cos(angle), speed * std::sin(angle)};
     m_isTackling = true;
-    m_slideDistance = 150.0f;
+    m_slideDistance = SLIDE_DISTANCE;
 }
 
 bool Player::isTackling() const {
     return m_isTackling;
 }
-
 
 void Player::freeze(float duration) {
     m_freezeTime = duration;
@@ -80,17 +73,6 @@ bool Player::collidesWith(const Player& other) const {
     float distance = std::sqrt(std::pow(m_position.x - other.m_position.x, 2) +
                                std::pow(m_position.y - other.m_position.y, 2));
     return distance < (m_size + other.m_size) / 2.0f;
-}
-
-// Jamais utilisée ?
-void Player::tackle() {
-    if (!m_isTackling) {
-        m_isTackling = true;
-        m_slideDistance = 200.0f; 
-        // Pas m_tackleSpeed ?
-        float tackleSpeed = 300.0f;
-        m_velocity = {tackleSpeed * std::cos(m_angle), tackleSpeed * std::sin(m_angle)};
-    }
 }
 
 void Player::update(float dt) {
@@ -106,16 +88,14 @@ void Player::update(float dt) {
     m_color = gf::Color::Red;
 
     if (m_isTackling) {
-        static constexpr float tackleFriction = 150.0f; 
-        static constexpr float minSlideSpeed = 5.0f; 
         float speed = std::sqrt(m_tackleVelocity.x * m_tackleVelocity.x + m_tackleVelocity.y * m_tackleVelocity.y);
 
         if (speed > 0.0f && m_slideDistance > 0.0f) {
-            float deceleration = tackleFriction * dt;
+            float deceleration = TACKLE_FRICTION * dt;
             speed = std::max(speed - deceleration, 0.0f);
             m_slideDistance -= speed * dt;
 
-            if (speed > 0.0f) {
+            if (speed > MIN_SLIDE_SPEED) {
                 m_velocity = m_tackleVelocity / std::sqrt(m_tackleVelocity.x * m_tackleVelocity.x + m_tackleVelocity.y * m_tackleVelocity.y) * speed;
                 m_position += dt * m_velocity;
             } else {
@@ -135,10 +115,6 @@ void Player::update(float dt) {
     }
 }
 
-gf::Vector2f Player::getVelocity() const {
-    return m_velocity;
-}
-
 void Player::render(gf::RenderTarget& target) {
     gf::RectangleShape shape({m_size, m_size});
     shape.setPosition(m_position);
@@ -155,11 +131,11 @@ float Player::getAngle() {
 }
 
 gf::Vector2f Player::getPassVelocity() {
-    return {(float)cos(m_angle) * PASSVELOCITY, (float)sin(m_angle) * PASSVELOCITY};
+    return {std::cos(m_angle) * PASS_VELOCITY, std::sin(m_angle) * PASS_VELOCITY};
 }
 
 gf::Vector2f Player::getShootVelocity() {
-    return {(float)cos(m_angle) * SHOOTVELOCITY, (float)sin(m_angle) * SHOOTVELOCITY};
+    return {std::cos(m_angle) * SHOOT_VELOCITY, std::sin(m_angle) * SHOOT_VELOCITY};
 }
 
 //TEMPORARY 
