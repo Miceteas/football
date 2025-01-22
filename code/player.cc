@@ -37,7 +37,7 @@ gf::Vector2f Player::getVelocity() const {
 }
 
 float Player::calcAngle(gf::Vector2f velocity) {
-    if (velocity.x == 0 && velocity.y == 0) {
+    if ((velocity.x == 0 && velocity.y == 0) || m_isTackling) {
         return m_angle;
     }
     return std::atan2(velocity.y, velocity.x);
@@ -84,8 +84,6 @@ void Player::update(float dt) {
         m_velocity = {0.0f, 0.0f};
         return;
     }
-
-    m_color = gf::Color::Red;
 
     if (m_isTackling) {
         float speed = std::sqrt(m_tackleVelocity.x * m_tackleVelocity.x + m_tackleVelocity.y * m_tackleVelocity.y);

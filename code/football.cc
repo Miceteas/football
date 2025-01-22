@@ -39,8 +39,8 @@
 #define PLAYERSIZE 30
 #define FIELDXSIZE 3200
 #define FIELDYSIZE 1664
-#define TOPPOLE 512
-#define BOTTOMPOLE 1152
+#define TOPPOLE 640
+#define BOTTOMPOLE 1024
 #define FIELD_X_TILES 25
 #define FIELD_Y_TILES 13
 #define TILESIZE 128
@@ -116,6 +116,7 @@ gf::Vector2f normalizeVelocity(gf::Vector2f velocity) {
 }
 
 std::vector<gf::Sprite> createField(std::vector<gf::Sprite> fieldSprites) {
+    /////////////////1//////////////////////
     std::vector<gf::Sprite> field;
     field.push_back(fieldSprites[5]);
     for (size_t i = 0; i < 11; ++i) {
@@ -476,20 +477,9 @@ int main() {
         fieldSprites.push_back(sprite);
     }
 
-
-
-
-
-
-
     // Initialize the field
     std::vector<gf::Sprite> field = createField(fieldSprites);
-    /////////////////1//////////////////////
     
-    
-    //////////////////////////////////////////////////////////
-    
-
     // default setup
     team.setupPlayers(FIELD_X_TILES*TILESIZE,FIELD_Y_TILES*TILESIZE);
 
@@ -520,80 +510,80 @@ int main() {
     bool cam1 = true;
 
 
-  while (window.isOpen()) {
-    // inputs
-    gf::Event event;
+    while (window.isOpen()) {
+        // inputs
+        gf::Event event;
 
-    while (window.pollEvent(event)) {
-        actions.processEvent(event);
-        views.processEvent(event);
-    }
-
-    if (closeWindowAction.isActive()) {
-        window.close();
-    }
-
-    if (fullscreenAction.isActive()) {
-        fullscreen = !fullscreen;
-        window.setFullscreen(fullscreen);
-    }
-
-    velocity = {0.0f, 0.0f};
-    if (leftAction.isActive()) {
-        velocity.x += -SPEED;
-    }
-    if (rightAction.isActive()) {
-        velocity.x += SPEED;
-    }
-
-    if (upAction.isActive()) {
-        velocity.y += -SPEED;
-    }
-    if (downAction.isActive()) {
-        velocity.y += SPEED;
-    }
-    velocity = normalizeVelocity(velocity);
-
-    // update
-
-    if (dropAction.isActive()) {
-        ball.unlock();
-    }
-
-    if (ball.isLockedTo(mainPlayer)) {
-        if (passAction.isActive()) {
-            ball.unlock();
-            ball.setVelocity(mainPlayer->getPassVelocity());
+        while (window.pollEvent(event)) {
+            actions.processEvent(event);
+            views.processEvent(event);
         }
 
-        if (shootAction.isActive()) {
-            ball.unlock();
-            ball.setVelocity(mainPlayer->getShootVelocity());
+        if (closeWindowAction.isActive()) {
+            window.close();
         }
-    }
 
-    if (tackleAction.isActive() && !mainPlayer->isTackling() &&  !ball.isLockedTo(mainPlayer)) {
-       mainPlayer->setTackleData(400.0f, mainPlayer->getAngle()); 
-    }
+        if (fullscreenAction.isActive()) {
+            fullscreen = !fullscreen;
+            window.setFullscreen(fullscreen);
+        }
 
-    if (mainPlayer->isTackling()) {
-        for (Player* player : team.getPlayers()) {
-            if (player != mainPlayer && mainPlayer->collidesWith(*player)) {
-                player->freeze(1.0f);
+        velocity = {0.0f, 0.0f};
+        if (leftAction.isActive()) {
+            velocity.x += -SPEED;
+        }
+        if (rightAction.isActive()) {
+            velocity.x += SPEED;
+        }
+
+        if (upAction.isActive()) {
+            velocity.y += -SPEED;
+        }
+        if (downAction.isActive()) {
+            velocity.y += SPEED;
+        }
+        velocity = normalizeVelocity(velocity);
+
+        // update
+
+        if (dropAction.isActive()) {
+            ball.unlock();
+        }
+
+        if (ball.isLockedTo(mainPlayer)) {
+            if (passAction.isActive()) {
+                ball.unlock();
+                ball.setVelocity(mainPlayer->getPassVelocity());
+            }
+
+            if (shootAction.isActive()) {
+                ball.unlock();
+                ball.setVelocity(mainPlayer->getShootVelocity());
             }
         }
-    }
 
-
-    if (switchAction.isActive() && !mainPlayer->isTackling()) {
-        // Switch main player between two players => to change
-        if (cam1) {
-            mainPlayer = team.getPlayers()[0];  
-        } else {
-            mainPlayer = team.getPlayers()[10]; 
+        if (tackleAction.isActive() && !mainPlayer->isTackling() &&  !ball.isLockedTo(mainPlayer)) {
+        mainPlayer->setTackleData(400.0f, mainPlayer->getAngle()); 
         }
-        cam1 = !cam1;
-    }
+
+        if (mainPlayer->isTackling()) {
+            for (Player* player : team.getPlayers()) {
+                if (player != mainPlayer && mainPlayer->collidesWith(*player)) {
+                    player->freeze(1.0f);
+                }
+            }
+        }
+
+
+        if (switchAction.isActive() && !mainPlayer->isTackling()) {
+            // Switch main player between two players => to change
+            if (cam1) {
+                mainPlayer = team.getPlayers()[0];  
+            } else {
+                mainPlayer = team.getPlayers()[10]; 
+            }
+            cam1 = !cam1;
+        }   
 
         actions.reset();
 
@@ -641,15 +631,19 @@ int main() {
         int out = ball.isOutOfField(FIELDXSIZE, FIELDYSIZE, TOPPOLE, BOTTOMPOLE, TILESIZE);
 
         checkOut(out, team.getPlayers(), ball.getLastTouchedBy());
-
-        view.setCenter(mainPlayer->getPosition());
+        
+        if (ball.isLockedTo(mainPlayer) || ball.getLastTouchedBy() == nullptr) {
+            view.setCenter(mainPlayer->getPosition());
+        }else {
+            view.setCenter(ball.getPosition());
+        }
         
         // render
         renderer.clear();
         //renderer.draw(sprite);
         renderer.setView(view);
 
-        for(auto fsprite : field) {
+        for (auto fsprite : field) {
             renderer.draw(fsprite);
         }
         
