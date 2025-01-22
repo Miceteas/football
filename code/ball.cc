@@ -6,7 +6,7 @@ Ball::Ball(float size, gf::Vector2f position, gf::Color4f color)
 , m_position(position)
 , m_color(color)
 , belongsTo(nullptr)
-, m_cooldown(0)
+, m_cooldown(0.0f)
 , lastTouchedBy(nullptr)
 {
 }
@@ -24,8 +24,8 @@ void Ball::setVelocity(gf::Vector2f velocity) {
 }
 
 void Ball::update(float dt) {
-    if (m_cooldown > 0) {
-        --m_cooldown;
+    if (m_cooldown > 0.0f) {
+        m_cooldown -= dt;
     }
     static constexpr float friction = 150.0f;
     float speed = std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y);
@@ -65,7 +65,7 @@ void Ball::lockTo(Player *p) {
 
 void Ball::unlock() {
     belongsTo = nullptr;
-    m_cooldown = 10;
+    m_cooldown = 0.2f;
 }
 
 bool Ball::isLockedTo(Player *p) const {
@@ -90,8 +90,9 @@ Player *Ball::getLastTouchedBy() {
     return lastTouchedBy;
 }
 
-int Ball::isOutOfField(int xsize, int ysize, int topPole, int bottomPole) {
-    if (m_position.x + m_size < 0) {
+int Ball::isOutOfField(int xsize, int ysize, int topPole, int bottomPole, int tileSize) {
+    int offset = tileSize / 8;
+    if (m_position.x + m_size < offset) {
         if (m_position.y + m_size < topPole) {
             //Corner on topleft
             return 1;
@@ -102,7 +103,7 @@ int Ball::isOutOfField(int xsize, int ysize, int topPole, int bottomPole) {
             //Goal against left team
             return 2;
         }
-    }else if (m_position.x - m_size > xsize) {
+    }else if (m_position.x - m_size > xsize - offset) {
         if (m_position.y + m_size < topPole) {
             //Corner on topright
             return 6;
@@ -114,10 +115,10 @@ int Ball::isOutOfField(int xsize, int ysize, int topPole, int bottomPole) {
             return 7;
         }
     }else {
-        if (m_position.y + m_size < 0) {
+        if (m_position.y + m_size < offset) {
             //Touch on top side
             return 4;
-        }else if (m_position.y - m_size > ysize) {
+        }else if (m_position.y - m_size > ysize - offset) {
             //Touch on bottom side
             return 5;
         }else {

@@ -17,7 +17,7 @@ class Ball : public gf::Entity {
     Player *belongsTo;
     Player *lastTouchedBy;
     bool m_isLocked; 
-    int m_cooldown;
+    float m_cooldown;
 
   public:
     Ball(float size, gf::Vector2f position, gf::Color4f color);
@@ -32,7 +32,7 @@ class Ball : public gf::Entity {
     void unlock();
     bool isLockedTo(Player *p) const;
     void render(gf::RenderTarget& target);
-    int isOutOfField(int xsize, int ysize, int leftPole, int rightPole);
+    int isOutOfField(int xsize, int ysize, int leftPole, int rightPole, int tileSize);
     Player *getLastTouchedBy();
 };
 

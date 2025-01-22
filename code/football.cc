@@ -604,6 +604,7 @@ int main() {
 
         for (auto& [player, sprite] : playerSprites) {
             sprite.setPosition(player->getPosition());
+            sprite.setRotation(player->getAngle());
         }
 
         gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
@@ -637,7 +638,7 @@ int main() {
 
         ball.update(dt.asSeconds());
 
-        int out = ball.isOutOfField(FIELDXSIZE, FIELDYSIZE, TOPPOLE, BOTTOMPOLE);
+        int out = ball.isOutOfField(FIELDXSIZE, FIELDYSIZE, TOPPOLE, BOTTOMPOLE, TILESIZE);
 
         checkOut(out, team.getPlayers(), ball.getLastTouchedBy());
 

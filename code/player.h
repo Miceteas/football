@@ -19,7 +19,6 @@ class Player : public gf::Entity {
     gf::Color4f m_color;
     float m_angle;
     float calcAngle(gf::Vector2f velocity);
-    bool isEqual(float a, float b);
     
   public:
     Player(float stamina, float size, gf::Vector2f position, Role role, gf::Color4f color, float angle);
@@ -39,14 +38,14 @@ class Player : public gf::Entity {
     float m_freezeTime;
     bool m_isTackling;
     float m_slideDistance;
+    float m_tackleSpeed;
+    float m_tackleAngle;
+    gf::Vector2f m_tackleVelocity;
     bool collidesWith(const Player& other) const;
     void tackle();
     void freeze(float duration);
     bool isTackling() const;
     void setTackleData(float speed, float angle);
-    float m_tackleSpeed;
-    float m_tackleAngle;
-    gf::Vector2f m_tackleVelocity;
 
     //TEMPORARY
     void changeColor(gf::Color4f color);

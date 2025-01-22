@@ -11,6 +11,8 @@ Player::Player(float stamina, float size, gf::Vector2f position, Role role, gf::
 , m_color(color)
 , m_role(role)
 , m_angle(angle)
+, m_isTackling(false)
+, m_freezeTime(0.0f)
 {
     
 }
@@ -73,17 +75,19 @@ void Player::freeze(float duration) {
     m_freezeTime = duration;
 }
 
-
+// Good function only if both players are circles but we might change the shapes to be
 bool Player::collidesWith(const Player& other) const {
     float distance = std::sqrt(std::pow(m_position.x - other.m_position.x, 2) +
                                std::pow(m_position.y - other.m_position.y, 2));
     return distance < (m_size + other.m_size) / 2.0f;
 }
 
+// Jamais utilisée ?
 void Player::tackle() {
     if (!m_isTackling) {
         m_isTackling = true;
         m_slideDistance = 200.0f; 
+        // Pas m_tackleSpeed ?
         float tackleSpeed = 300.0f;
         m_velocity = {tackleSpeed * std::cos(m_angle), tackleSpeed * std::sin(m_angle)};
     }
@@ -98,6 +102,8 @@ void Player::update(float dt) {
         m_velocity = {0.0f, 0.0f};
         return;
     }
+
+    m_color = gf::Color::Red;
 
     if (m_isTackling) {
         static constexpr float tackleFriction = 150.0f; 
@@ -144,20 +150,16 @@ void Player::render(gf::RenderTarget& target) {
     target.draw(shape);
 }
 
-bool Player::isEqual(float a, float b) {
-    return std::fabs(a - b) < 0.01;
-}
-
 float Player::getAngle() {
     return m_angle;
 }
 
 gf::Vector2f Player::getPassVelocity() {
-    return {cos(m_angle) * PASSVELOCITY, sin(m_angle) * PASSVELOCITY};
+    return {(float)cos(m_angle) * PASSVELOCITY, (float)sin(m_angle) * PASSVELOCITY};
 }
 
 gf::Vector2f Player::getShootVelocity() {
-    return {cos(m_angle) * SHOOTVELOCITY, sin(m_angle) * SHOOTVELOCITY};
+    return {(float)cos(m_angle) * SHOOTVELOCITY, (float)sin(m_angle) * SHOOTVELOCITY};
 }
 
 //TEMPORARY 
