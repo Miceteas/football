@@ -1,5 +1,7 @@
 #include "ball.h"
 
+#define BASECOOLDOWN 0.2
+
 Ball::Ball(float size, gf::Vector2f position, gf::Color4f color)
 : m_velocity({0, 0})
 , m_size(size)
@@ -65,7 +67,7 @@ void Ball::lockTo(Player *p) {
 
 void Ball::unlock() {
     belongsTo = nullptr;
-    m_cooldown = 0.2f;
+    m_cooldown = BASECOOLDOWN;
 }
 
 bool Ball::isLockedTo(Player *p) const {
@@ -91,6 +93,7 @@ Player *Ball::getLastTouchedBy() {
 }
 
 int Ball::isOutOfField(int xsize, int ysize, int topPole, int bottomPole, int tileSize) {
+    //Because there is a little offset on the sides of the field of 8 pixels / 64 pixels in the tilesheet
     int offset = tileSize / 8;
     if (m_position.x + m_size < offset) {
         if (m_position.y + m_size < topPole) {
