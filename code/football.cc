@@ -550,6 +550,15 @@ int main() {
             ball.unlock();
         }
 
+        for (Player* player : team.getPlayers()) {
+            if (ball.isTouchingPlayer(*player)) {
+                ball.lockTo(player);
+            }
+            if (ball.isLockedTo(player)) {
+                mainPlayer = player;
+            }
+        }
+
         if (ball.isLockedTo(mainPlayer)) {
             if (passAction.isActive()) {
                 ball.unlock();

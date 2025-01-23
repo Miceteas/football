@@ -34,6 +34,8 @@ class Ball : public gf::Entity {
     void render(gf::RenderTarget& target);
     int isOutOfField(int xsize, int ysize, int leftPole, int rightPole, int tileSize);
     Player *getLastTouchedBy();
+
+    bool isTouchingPlayer(const Player& player) const;
 };
 
 #endif

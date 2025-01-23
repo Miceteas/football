@@ -62,6 +62,7 @@ void Ball::lockTo(Player *p) {
     if (m_cooldown <= 0) {
         belongsTo = p;
         lastTouchedBy = p;
+        m_cooldown = BASECOOLDOWN;
     } 
 }
 
@@ -129,4 +130,10 @@ int Ball::isOutOfField(int xsize, int ysize, int topPole, int bottomPole, int ti
             return 0;
         }
     }
+}
+
+bool Ball::isTouchingPlayer(const Player& player) const {
+    float distance = std::sqrt(std::pow(m_position.x - player.getPosition().x, 2) +
+                               std::pow(m_position.y - player.getPosition().y, 2));
+    return distance < (m_size + player.getSize()) / 2.0f;
 }
