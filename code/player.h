@@ -45,6 +45,7 @@ class Player : public gf::Entity {
     bool isTackling() const;
     bool collidesWith(const Player& other) const;
     void freeze(float duration);
+    void handleCollision(Player& other);
   
     //TEMPORARY 
     void changeColor(gf::Color4f color);

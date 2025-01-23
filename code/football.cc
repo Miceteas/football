@@ -557,6 +557,12 @@ int main() {
             if (ball.isLockedTo(player)) {
                 mainPlayer = player;
             }
+
+            for (Player* other : team.getPlayers()) {
+                if (player != other) {
+                    player->handleCollision(*other);
+                }
+            }
         }
 
         if (ball.isLockedTo(mainPlayer)) {
