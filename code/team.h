@@ -9,6 +9,7 @@
 #include "role.h"
 
 #include "player.h"
+#include "ball.h"
 
 class Team {
     private:
@@ -34,5 +35,6 @@ class Team {
 
         void initPlayers();
         void setupPlayers(float fieldWidth, float fieldHeight);
+        Player* getClosestPlayerToBall(const Ball& ball);
 };
 

@@ -589,16 +589,15 @@ int main() {
             }
         }
 
-
-        if (switchAction.isActive() && !mainPlayer->isTackling()) {
-            // Switch main player between two players => to change
+        if (switchAction.isActive() && !mainPlayer->isTackling() && !ball.isLockedTo(mainPlayer)) {
             if (cam1) {
-                mainPlayer = team.getPlayers()[0];  
-            } else {
-                mainPlayer = team.getPlayers()[10]; 
+                Player* closestPlayer = team.getClosestPlayerToBall(ball);
+                if (closestPlayer) {
+                    mainPlayer = closestPlayer;
+                }
             }
             cam1 = !cam1;
-        }   
+        }
 
         actions.reset();
 

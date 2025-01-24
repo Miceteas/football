@@ -1,5 +1,6 @@
 #include "team.h"
 #include "player.h"
+#include "ball.h"
 
 #define PLAYERSIZE 30
 
@@ -91,8 +92,19 @@ void Team::setupPlayers(float fieldHeight, float fieldWidth) {
 }
 
 
+Player* Team::getClosestPlayerToBall(const Ball& ball) {
+    Player* closestPlayer = nullptr;
+    float minDistance = std::numeric_limits<float>::max();
 
+    for (Player* player : players) {
+        float distance = std::sqrt(std::pow(player->getPosition().x - ball.getPosition().x, 2) +
+                                   std::pow(player->getPosition().y - ball.getPosition().y, 2));
 
+        if (distance < minDistance) {
+            minDistance = distance;
+            closestPlayer = player;
+        }
+    }
 
-
-
+    return closestPlayer;
+}
