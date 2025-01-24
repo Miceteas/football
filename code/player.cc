@@ -72,19 +72,27 @@ void Player::freeze(float duration) {
 bool Player::collidesWith(const Player& other) const {
     float distance = std::sqrt(std::pow(m_position.x - other.m_position.x, 2) +
                                std::pow(m_position.y - other.m_position.y, 2));
+    
+    if (isTackling()) {
+        return distance < (m_size + other.m_size);
+    }
+
     return distance < (m_size + other.m_size) / 2.0f;
 }
+
 
 void Player::handleCollision(Player& other) {
     if (collidesWith(other)) {
         float distance = std::sqrt(std::pow(m_position.x - other.m_position.x, 2) +
                                    std::pow(m_position.y - other.m_position.y, 2));
 
-        float overlap = (m_size + other.m_size) / 2.0f - distance;
-        if (overlap > 0) {
-            gf::Vector2f direction = other.m_position - m_position;
-            m_position -= direction * (overlap / distance);
-            other.m_position += direction * (overlap / distance);
+        if (distance < (m_size + other.m_size) / 2.0f && !isTackling() && !other.isTackling()) {
+            float overlap = (m_size + other.m_size) / 2.0f - distance;
+            if (overlap > 0) {
+                gf::Vector2f direction = other.m_position - m_position;
+                m_position -= direction * (overlap / distance);
+                other.m_position += direction * (overlap / distance);
+            }
         }
     }
 }
