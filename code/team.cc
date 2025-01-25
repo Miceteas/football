@@ -27,7 +27,7 @@ void Team::putPlayerBench(Player *p) {
 
 void Team::showActivePlayers(gf::RenderTarget& target) {
     for (Player *p : players) {
-        p->render(target); 
+        p->render(target,false); 
     }
 }
 
@@ -37,7 +37,7 @@ std::vector<Player*> Team::getPlayers(){
 
 void Team::showBenchPlayers(gf::RenderTarget& target) {
     for (Player *p : bench) {
-        p->render(target);
+        p->render(target,false);
     }
 }
 

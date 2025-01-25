@@ -417,6 +417,11 @@ int main() {
     sprintAction.addScancodeKeyControl(gf::Scancode::B); 
     actions.addAction(sprintAction);
 
+    // Temporary
+    gf::Action stopSprintAction("StopSprint");
+    stopSprintAction.addScancodeKeyControl(gf::Scancode::N); 
+    actions.addAction(stopSprintAction);
+
 
     // add entities
     gf::EntityContainer mainEntities;
@@ -589,6 +594,13 @@ int main() {
             }
         }
 
+       if (sprintAction.isActive()) {
+            mainPlayer->startSprint();
+       }
+       if (stopSprintAction.isActive()){
+            mainPlayer->stopSprint();
+       }
+
         if (switchAction.isActive() && !mainPlayer->isTackling() && !ball.isLockedTo(mainPlayer)) {
             if (cam1) {
                 Player* closestPlayer = team.getClosestPlayerToBall(ball);
@@ -660,12 +672,11 @@ int main() {
         for (auto fsprite : field) {
             renderer.draw(fsprite);
         }
-        
-        for (auto& [player, sprite] : playerSprites) {
-            // renderer.draw(sprite);
-            player->render(renderer);
-        }
 
+       for (auto& [player, sprite] : playerSprites) {
+            // renderer.draw(sprite);
+            player->render(renderer, player == mainPlayer);
+        }
 
         ball.render(renderer);
 

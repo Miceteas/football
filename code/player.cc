@@ -1,6 +1,6 @@
 #include "player.h"
 
-#define PASS_VELOCITY 300
+#define PASS_VELOCITY 400
 #define SHOOT_VELOCITY 600
 #define SLIDE_DISTANCE 150.0f
 #define TACKLE_FRICTION 150.0f
@@ -19,7 +19,8 @@ Player::Player(float stamina, float size, gf::Vector2f position, Role role, gf::
 , m_slideDistance(SLIDE_DISTANCE)
 , m_tackleSpeed(0.0f)
 , m_tackleAngle(0.0f)
-, m_tackleVelocity({0, 0}) 
+, m_tackleVelocity({0, 0})
+, m_isSprinting(false)
 {
     
 }
@@ -128,6 +129,9 @@ void Player::update(float dt) {
         }
     } else {
         if (std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y) > 0.0f) {
+            if (m_isSprinting) {
+                m_velocity *= 1.5f;
+            }
             m_position += dt * m_velocity;
         } else {
             m_velocity = {0.0f, 0.0f};
@@ -135,7 +139,7 @@ void Player::update(float dt) {
     }
 }
 
-void Player::render(gf::RenderTarget& target) {
+void Player::render(gf::RenderTarget& target, bool isMainPlayer) {
     gf::RectangleShape shape({m_size, m_size});
     shape.setPosition(m_position);
     shape.setAnchor(gf::Anchor::Center);
@@ -144,6 +148,14 @@ void Player::render(gf::RenderTarget& target) {
     shape.setOutlineColor(gf::Color::darker(m_color));
     shape.setRotation(m_angle);
     target.draw(shape);
+
+    if (isMainPlayer) {
+        gf::RectangleShape square({m_size * 0.4f, m_size * 0.4f});
+        square.setPosition(m_position);
+        square.setAnchor(gf::Anchor::Center);
+        square.setColor(gf::Color::Green);
+        target.draw(square);
+    }
 }
 
 float Player::getAngle() {
@@ -156,6 +168,14 @@ gf::Vector2f Player::getPassVelocity() {
 
 gf::Vector2f Player::getShootVelocity() {
     return {std::cos(m_angle) * SHOOT_VELOCITY, std::sin(m_angle) * SHOOT_VELOCITY};
+}
+
+void Player::startSprint() {
+    m_isSprinting = true;
+}
+
+void Player::stopSprint() {
+    m_isSprinting = false;
 }
 
 //TEMPORARY 
