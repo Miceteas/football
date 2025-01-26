@@ -16,6 +16,7 @@ add_executable(football
   code/ball.cc
   code/player.cc
   code/team.cc
+  code/field.cc
 )
 
 # Ajouter les répertoires pour inclure les headers
