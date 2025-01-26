@@ -116,6 +116,11 @@ gf::Vector2f normalizeVelocity(gf::Vector2f velocity) {
 }
 
 std::vector<gf::Sprite> createField(std::vector<gf::Sprite> fieldSprites) {
+    // https://gamedevframework.github.io/v1.2.0/classgf_1_1_tile_layer.html (orthogonal)
+    // spriteBatch existe aussi mais moins adapté ici
+    // Faire avec un tableaux 2d en Ascii pour lier un char à un tile pour le dessin
+
+
     /////////////////1//////////////////////
     std::vector<gf::Sprite> field;
     field.push_back(fieldSprites[5]);
@@ -546,7 +551,7 @@ int main() {
 
         // update
 
-        if (dropAction.isActive()) {
+        if (dropAction.isActive() && ball.isLockedTo(mainPlayer)) {
             ball.unlock();
         }
 
@@ -631,7 +636,7 @@ int main() {
         int out = ball.isOutOfField(FIELDXSIZE, FIELDYSIZE, TOPPOLE, BOTTOMPOLE, TILESIZE);
 
         checkOut(out, team.getPlayers(), ball.getLastTouchedBy());
-        
+
         if (ball.isLockedTo(mainPlayer) || ball.getLastTouchedBy() == nullptr) {
             view.setCenter(mainPlayer->getPosition());
         }else {
