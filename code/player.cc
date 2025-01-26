@@ -1,10 +1,11 @@
 #include "player.h"
 
-#define PASS_VELOCITY 400
-#define SHOOT_VELOCITY 600
+#define PASS_VELOCITY 400.0f
+#define SHOOT_VELOCITY 600.0f
 #define SLIDE_DISTANCE 150.0f
 #define TACKLE_FRICTION 150.0f
 #define MIN_SLIDE_SPEED 5.0f
+#define MAX_PASS_DISTANCE 300.0f
 
 Player::Player(float stamina, float size, gf::Vector2f position, Role role, gf::Color4f color, float angle)
 : m_stamina(stamina)
@@ -162,11 +163,37 @@ float Player::getAngle() {
     return m_angle;
 }
 
-gf::Vector2f Player::getPassVelocity() {
-    return {std::cos(m_angle) * PASS_VELOCITY, std::sin(m_angle) * PASS_VELOCITY};
+gf::Vector2f Player::getPassVelocity(std::vector<Player *> players) {
+    float bestAngle = 0;
+    bool aimAssist = false;
+
+    for (const auto& other : players) {
+        if (this == other) continue;
+
+        float distance = std::sqrt(std::pow(m_position.x - other->m_position.x, 2) +
+                                   std::pow(m_position.y - other->m_position.y, 2));
+
+        if (distance <= MAX_PASS_DISTANCE) {
+            float angle = std::atan2(other->m_position.y - m_position.y, other->m_position.x - m_position.x);
+            if (std::abs(angle - m_angle) < M_PI / 8 
+            || std::abs(angle - m_angle + 2 * M_PI)  < M_PI / 8) {
+                if (!aimAssist || std::min(std::abs(bestAngle - m_angle), (float) std::abs(bestAngle - m_angle + 2 * M_PI)) > std::min(std::abs(angle - m_angle), (float) std::abs(angle - m_angle + 2 * M_PI))) {
+                    bestAngle = angle;
+                    aimAssist = true;
+                }
+            }
+        }
+    }
+
+    if (!aimAssist) {
+        return {std::cos(m_angle) * PASS_VELOCITY, std::sin(m_angle) * PASS_VELOCITY};
+    }else {
+        return {std::cos(bestAngle) * PASS_VELOCITY, std::sin(bestAngle) * PASS_VELOCITY};
+    }
 }
 
 gf::Vector2f Player::getShootVelocity() {
+    float best_angle = m_angle;
     return {std::cos(m_angle) * SHOOT_VELOCITY, std::sin(m_angle) * SHOOT_VELOCITY};
 }
 

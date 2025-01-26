@@ -330,7 +330,7 @@ int main() {
         if (ball.isLockedTo(mainPlayer)) {
             if (passAction.isActive()) {
                 ball.unlock();
-                ball.setVelocity(mainPlayer->getPassVelocity());
+                ball.setVelocity(mainPlayer->getPassVelocity(team.getPlayers()));
             }
 
             if (shootAction.isActive()) {

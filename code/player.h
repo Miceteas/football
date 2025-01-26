@@ -39,7 +39,7 @@ class Player : public gf::Entity {
     void update(float dt);
     void render(gf::RenderTarget& target, bool isMainPlayer);
     float getAngle();
-    gf::Vector2f getPassVelocity();
+    gf::Vector2f getPassVelocity(std::vector<Player *> players);
     gf::Vector2f getShootVelocity();
 
     void setTackleData(float speed, float angle);
