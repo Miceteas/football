@@ -23,6 +23,7 @@ class Player : public gf::Entity {
     float m_tackleSpeed;
     float m_tackleAngle;
     gf::Vector2f m_tackleVelocity;
+    bool m_isSprinting;
 
     float calcAngle(gf::Vector2f velocity);
 
@@ -36,7 +37,7 @@ class Player : public gf::Entity {
     void setPosition(gf::Vector2f position);
     void setVelocity(gf::Vector2f velocity);
     void update(float dt);
-    void render(gf::RenderTarget& target);
+    void render(gf::RenderTarget& target, bool isMainPlayer);
     float getAngle();
     gf::Vector2f getPassVelocity();
     gf::Vector2f getShootVelocity();
@@ -45,6 +46,9 @@ class Player : public gf::Entity {
     bool isTackling() const;
     bool collidesWith(const Player& other) const;
     void freeze(float duration);
+    void handleCollision(Player& other);
+    void startSprint();
+    void stopSprint();
   
     //TEMPORARY 
     void changeColor(gf::Color4f color);
