@@ -40,7 +40,7 @@ class Player : public gf::Entity {
     void render(gf::RenderTarget& target, bool isMainPlayer);
     float getAngle();
     gf::Vector2f getPassVelocity(std::vector<Player *> players);
-    gf::Vector2f getShootVelocity();
+    gf::Vector2f getShootVelocity(float FIELDXSIZE, float FIELDYSIZE, float TOPPOLE, float BOTTOMPOLE, float ballSize, std::vector<Player *> teamPlayersVec);
 
     void setTackleData(float speed, float angle);
     bool isTackling() const;

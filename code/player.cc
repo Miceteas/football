@@ -6,6 +6,7 @@
 #define TACKLE_FRICTION 150.0f
 #define MIN_SLIDE_SPEED 5.0f
 #define MAX_PASS_DISTANCE 300.0f
+#define MAX_SHOOT_DISTANCE 1200.0f
 
 Player::Player(float stamina, float size, gf::Vector2f position, Role role, gf::Color4f color, float angle)
 : m_stamina(stamina)
@@ -192,9 +193,34 @@ gf::Vector2f Player::getPassVelocity(std::vector<Player *> players) {
     }
 }
 
-gf::Vector2f Player::getShootVelocity() {
+gf::Vector2f Player::getShootVelocity(float FIELDXSIZE, float FIELDYSIZE, float TOPPOLE, float BOTTOMPOLE, float ballSize, std::vector<Player *> teamPlayersVec) {
     float best_angle = m_angle;
-    return {std::cos(m_angle) * SHOOT_VELOCITY, std::sin(m_angle) * SHOOT_VELOCITY};
+    bool isMemberOfTeam = std::count(teamPlayersVec.begin(), teamPlayersVec.end(), this) > 0;
+    float aimingX = isMemberOfTeam ? FIELDXSIZE : 0;
+    float aimingY = 0;
+    bool aimAssist = false;
+    
+    if (m_position.y < TOPPOLE) {
+        aimingY = TOPPOLE + ballSize;
+        aimAssist = true;
+    }else if (m_position.y > BOTTOMPOLE) {
+        aimingY = BOTTOMPOLE - ballSize;
+        aimAssist = true;
+    }
+
+    if (aimAssist) {
+        float distance = std::sqrt(std::pow(m_position.x - aimingX, 2) +
+                                   std::pow(m_position.y - aimingY, 2));
+        if (distance < MAX_SHOOT_DISTANCE) {
+            float angle = std::atan2(aimingY - m_position.y, aimingX - m_position.x);
+            if (std::abs(angle - m_angle) < M_PI / 8 
+            || std::abs(angle - m_angle + 2 * M_PI)  < M_PI / 8) {
+                best_angle = angle;
+            }
+        }
+    }
+
+    return {std::cos(best_angle) * SHOOT_VELOCITY, std::sin(best_angle) * SHOOT_VELOCITY};
 }
 
 void Player::startSprint() {

@@ -335,7 +335,7 @@ int main() {
 
             if (shootAction.isActive()) {
                 ball.unlock();
-                ball.setVelocity(mainPlayer->getShootVelocity());
+                ball.setVelocity(mainPlayer->getShootVelocity(FIELDXSIZE, FIELDYSIZE, TOPPOLE, BOTTOMPOLE, ball.getSize(), team.getPlayers()));
             }
         }
 
