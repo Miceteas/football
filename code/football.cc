@@ -34,6 +34,7 @@
 #include "role.h"
 #include "team.h"
 #include "field.h"
+#include "minimap.h"
 
 #define FOOTBALL_DATA_DIR "@FOOTBALL_DATA_DIR@"
 
@@ -451,22 +452,36 @@ int main() {
         };  
 
         FootballField field("../assets/Tilesheet/groundGrass.png", tileOrder, FIELD_X_TILES, FIELD_Y_TILES, TILESIZE);
-        
-        // render
+
+
+        //Minimap minimap(field, 0.2f); // 0.2f is the scale for the minimap
+        //minimap.setPosition(10.0f, 10.0f); // Position in the top-left corner
+
+        // Main loop (rendering section)
         renderer.clear();
 
+        // Set the main view for the field and game entities
         renderer.setView(view);
 
+        // Render the field
         renderer.draw(field.getTileLayer(), gf::RenderStates());
 
-
-        for(auto& [player, sprite] : playerSprites) {
+        // Render the players
+        for (auto& [player, sprite] : playerSprites) {
             player->render(renderer, player == mainPlayer);
         }
 
+        // Render the ball
         ball.render(renderer);
 
 
+        // Render the minimap
+        //minimap.render(renderer);
+
+        // Return to the main game view
+        renderer.setView(view);
+
+        // Display everything
         renderer.display();
     }
 

@@ -18,7 +18,7 @@ class FootballField {
         gf::TileLayer m_tileLayer;     
         int m_tilesX;                  // Number of tiles X (width)
         int m_tilesY;                  // Number of tiles Y (height)
-        int m_displayTileSize;         // Display size of each tile (on the screen => because different from the size of the tile in the spritesheet)
+        int m_displayTileSize;         // Display size of each tile (on the screen => because different)
         const int m_spriteTileSize;    // Fixed size of each tile in the spritesheet (for the spritesheet we're using it's 64x64 pixels)
 };
 
