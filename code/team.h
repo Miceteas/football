@@ -18,17 +18,18 @@ class Team {
         std::vector<Player*> players;
         std::vector<Player*> bench;
         int setup;
-        bool up;
+        bool left;
 
     public :
-        Team(std::string name, gf::Color4f color) : name(name), color(color), setup(0), up(true) {}
+        Team(std::string name, gf::Color4f color) : name(name), color(color), setup(0), left(true) {}
         std::string getName();
         gf::Color4f getColor();
         void changeSetup(int setup);
         
-        void showActivePlayers(gf::RenderTarget& target);
+        void showActivePlayers(gf::RenderTarget& target); // idk... 
         void showBenchPlayers(gf::RenderTarget& target);
 
+        void setupSide(bool side);
         void addPlayer(Player *p);
         void putPlayerBench(Player *p);
         std::vector<Player*> getPlayers();

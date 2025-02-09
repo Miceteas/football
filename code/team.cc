@@ -25,6 +25,10 @@ void Team::putPlayerBench(Player *p) {
     bench.push_back(p);
 }
 
+void Team::setupSide(bool side){
+    left = side;
+}
+
 void Team::showActivePlayers(gf::RenderTarget& target) {
     for (Player *p : players) {
         p->render(target,false); 
@@ -55,40 +59,35 @@ void Team::initPlayers() {
     players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(100.0f, 40.0f), Role::ATTACKER, color, 0));
 }
 
-void Team::setupPlayers(float fieldHeight, float fieldWidth) {
-    float xOffset = fieldWidth / 2.0f;
-    float yOffset = up ? 0.1f * fieldHeight : fieldHeight - 0.1f * fieldHeight;
-    float playerSpacing = fieldWidth / 10.0f;
+// need to have small changes for final product!!! But is good enough
+void Team::setupPlayers(float fieldWidth, float fieldHeight) {
+    float xOffset = left ? 0.1f * fieldWidth : fieldWidth - 0.1f * fieldWidth;
+    float yOffset = fieldHeight / 2.0f;
+    float playerSpacingY = fieldHeight / 5.0f;
+    float playerSpacingX = fieldWidth / 10.0f;
 
+    // Goalkeeper
     players[0]->setVelocity({0.0f, 0.0f});
     players[0]->setPosition({xOffset, yOffset});
 
-    float defenderYOffset = yOffset + (up ? 1 : -1) * (fieldHeight / 8.0f);
-    players[1]->setVelocity({0.0f, 0.0f});
-    players[1]->setPosition({xOffset - playerSpacing, defenderYOffset});
-    players[2]->setVelocity({0.0f, 0.0f});
-    players[2]->setPosition({xOffset, defenderYOffset});
-    players[3]->setVelocity({0.0f, 0.0f});
-    players[3]->setPosition({xOffset + playerSpacing, defenderYOffset});
+    // Défense (4 joueurs)
+    float defenseX = xOffset + (left ? 1 : -1) * playerSpacingX;
+    players[1]->setPosition({defenseX, yOffset - 1.5f * playerSpacingY});
+    players[2]->setPosition({defenseX, yOffset - 0.5f * playerSpacingY});
+    players[3]->setPosition({defenseX, yOffset + 0.5f * playerSpacingY});
+    players[4]->setPosition({defenseX, yOffset + 1.5f * playerSpacingY});
 
-    float midfielderYOffset = defenderYOffset + (up ? 1 : -1) * (fieldHeight / 8.0f);
-    players[4]->setVelocity({0.0f, 0.0f});
-    players[4]->setPosition({xOffset - playerSpacing, midfielderYOffset});
-    players[5]->setVelocity({0.0f, 0.0f});
-    players[5]->setPosition({xOffset, midfielderYOffset});
-    players[6]->setVelocity({0.0f, 0.0f});
-    players[6]->setPosition({xOffset + playerSpacing, midfielderYOffset});
+    // Milieu de terrain (3 joueurs)
+    float midfieldX = defenseX + (left ? 1 : -1) * playerSpacingX;
+    players[5]->setPosition({midfieldX, yOffset - playerSpacingY});
+    players[6]->setPosition({midfieldX, yOffset});
+    players[7]->setPosition({midfieldX, yOffset + playerSpacingY});
 
-    float strikerYOffset = midfielderYOffset + (up ? 1 : -1) * (fieldHeight / 8.0f);
-    players[7]->setVelocity({0.0f, 0.0f});
-    players[7]->setPosition({xOffset - playerSpacing, strikerYOffset});
-    players[8]->setVelocity({0.0f, 0.0f});
-    players[8]->setPosition({xOffset, strikerYOffset});
-    players[9]->setVelocity({0.0f, 0.0f});
-    players[9]->setPosition({xOffset + playerSpacing, strikerYOffset});
-
-    players[10]->setVelocity({0.0f, 0.0f});
-    players[10]->setPosition({xOffset, strikerYOffset + (up ? 1 : -1) * (fieldHeight / 8.0f)});
+    // Attaque (3 joueurs)
+    float attackX = midfieldX + (left ? 1 : -1) * playerSpacingX;
+    players[8]->setPosition({attackX, yOffset - playerSpacingY});
+    players[9]->setPosition({attackX, yOffset});
+    players[10]->setPosition({attackX, yOffset + playerSpacingY});
 }
 
 

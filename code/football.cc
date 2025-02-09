@@ -224,6 +224,10 @@ int main() {
     Team team("Team A", gf::Color::Azure);
     team.initPlayers();  // Initialize the players
 
+    Team team2("Team B", gf::Color::Chartreuse);
+    team2.initPlayers();
+    team2.setupSide(false);
+
     // Texture players
     /*gf::Texture texture("../assets/PNG/Blue/characterBlue(1).png") ;
 
@@ -245,8 +249,10 @@ int main() {
     
     // default setup
     team.setupPlayers(FIELD_X_TILES*TILESIZE,FIELD_Y_TILES*TILESIZE);
+    team2.setupPlayers(FIELD_X_TILES*TILESIZE,FIELD_Y_TILES*TILESIZE);
 
     std::unordered_map<Player*, gf::Sprite> playerSprites;
+    std::unordered_map<Player*, gf::Sprite> playerSprites2;
 
     for (size_t i = 0; i < team.getPlayers().size(); ++i) {
         Player* player = team.getPlayers()[i];
@@ -255,6 +261,15 @@ int main() {
         sprite.setPosition(player->getPosition());
         sprite.setRotation(player->getAngle());
         playerSprites[player] = sprite;
+    }
+
+    for (size_t i = 0; i < team2.getPlayers().size(); ++i) {
+        Player* player = team2.getPlayers()[i];
+        gf::Sprite sprite(playerTextures[i]);
+        sprite.setScale({player->getSize()/ playerTextures[i].getSize().x, player->getSize() / playerTextures[i].getSize().y});
+        sprite.setPosition(player->getPosition());
+        sprite.setRotation(player->getAngle());
+        playerSprites2[player] = sprite;
     }
 
     // Add team players to the mainEntities
@@ -326,6 +341,12 @@ int main() {
                     player->handleCollision(*other);
                 }
             }
+
+            for (Player* other : team2.getPlayers()) {
+                if (player != other) {
+                    player->handleCollision(*other);
+                }
+            }
         }
 
         if (ball.isLockedTo(mainPlayer)) {
@@ -341,11 +362,16 @@ int main() {
         }
 
         if (tackleAction.isActive() && !mainPlayer->isTackling() &&  !ball.isLockedTo(mainPlayer)) {
-        mainPlayer->setTackleData(400.0f, mainPlayer->getAngle()); 
+            mainPlayer->setTackleData(400.0f, mainPlayer->getAngle()); 
         }
 
         if (mainPlayer->isTackling()) {
             for (Player* player : team.getPlayers()) {
+                if (player != mainPlayer && mainPlayer->collidesWith(*player)) {
+                    player->freeze(1.0f);
+                }
+            }
+            for (Player* player : team2.getPlayers()) {
                 if (player != mainPlayer && mainPlayer->collidesWith(*player)) {
                     player->freeze(1.0f);
                 }
@@ -377,6 +403,11 @@ int main() {
         mainPlayer->update(dt.asSeconds());
 
         for (auto& [player, sprite] : playerSprites) {
+            sprite.setPosition(player->getPosition());
+            sprite.setRotation(player->getAngle());
+        }
+
+        for (auto& [player, sprite] : playerSprites2) {
             sprite.setPosition(player->getPosition());
             sprite.setRotation(player->getAngle());
         }
@@ -469,6 +500,10 @@ int main() {
         // Render the players
         for (auto& [player, sprite] : playerSprites) {
             player->render(renderer, player == mainPlayer);
+        }
+
+        for (auto& [player, sprite] : playerSprites2) {
+            player->render(renderer, false);
         }
 
         // Render the ball
