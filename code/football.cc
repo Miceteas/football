@@ -36,20 +36,12 @@
 #include "field.h"
 #include "minimap.h"
 
-#define FOOTBALL_DATA_DIR "@FOOTBALL_DATA_DIR@"
-
 #define BALLSIZE 10
 #define PLAYERSIZE 30
-#define FIELDXSIZE 3200
-#define FIELDYSIZE 1664
-#define TOPPOLE 640
-#define BOTTOMPOLE 1024
 #define FIELD_X_TILES 25
 #define FIELD_Y_TILES 13
 #define TILESIZE 128
 
-// constants
-static constexpr float SPEED = 240.0f;
 
 void touch(bool isTop, bool forPlayerTeam) {
   //Do something for a touch
@@ -67,8 +59,8 @@ void goal(bool isPlayerTeam) {
 }
 
 void checkOut(int isOut, std::vector<Player *> teamPlayersVec, Player *lastTouchedBy) {
+    bool isMemberOfTeam = count(teamPlayersVec.begin(), teamPlayersVec.end(), lastTouchedBy) > 0;
     if (isOut != 0) {
-        bool isMemberOfTeam = count(teamPlayersVec.begin(), teamPlayersVec.end(), lastTouchedBy) > 0;
         switch (isOut) {
             case 1 : 
                 corner(0, isMemberOfTeam);
@@ -102,10 +94,6 @@ void checkOut(int isOut, std::vector<Player *> teamPlayersVec, Player *lastTouch
                 corner(3, isMemberOfTeam);
                 lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
-        }
-    }else {
-        if (lastTouchedBy != nullptr) {
-            lastTouchedBy->changeColor(gf::Color::Azure);
         }
     }
 }
@@ -207,12 +195,8 @@ int main() {
 
     gf::Action sprintAction("Sprint");
     sprintAction.addScancodeKeyControl(gf::Scancode::B); 
+    sprintAction.setContinuous();
     actions.addAction(sprintAction);
-
-    // Temporary
-    gf::Action stopSprintAction("StopSprint");
-    stopSprintAction.addScancodeKeyControl(gf::Scancode::N); 
-    actions.addAction(stopSprintAction);
 
     // add entities
     gf::EntityContainer mainEntities;
@@ -332,6 +316,7 @@ int main() {
             if (ball.isTouchingPlayer(*player)) {
                 ball.lockTo(player);
             }
+
             if (ball.isLockedTo(player)) {
                 mainPlayer = player;
             }
@@ -348,6 +333,11 @@ int main() {
                 }
             }
         }
+        for (Player* player : team2.getPlayers()) {
+            if (ball.isTouchingPlayer(*player)) {
+                ball.lockTo(player);
+            }
+        }
 
         if (ball.isLockedTo(mainPlayer)) {
             if (passAction.isActive()) {
@@ -357,7 +347,7 @@ int main() {
 
             if (shootAction.isActive()) {
                 ball.unlock();
-                ball.setVelocity(mainPlayer->getShootVelocity(FIELDXSIZE, FIELDYSIZE, TOPPOLE, BOTTOMPOLE, ball.getSize(), team.getPlayers()));
+                ball.setVelocity(mainPlayer->getShootVelocity(ball.getSize(), team.getPlayers()));
             }
         }
 
@@ -378,12 +368,11 @@ int main() {
             }
         }
 
-       if (sprintAction.isActive()) {
+        if (sprintAction.isActive()) {
             mainPlayer->startSprint();
-       }
-       if (stopSprintAction.isActive()){
+        } else {
             mainPlayer->stopSprint();
-       }
+        }
 
         if (switchAction.isActive() && !mainPlayer->isTackling() && !ball.isLockedTo(mainPlayer)) {
             if (cam1) {
@@ -400,8 +389,6 @@ int main() {
         gf::Time dt = clock.restart();
         mainPlayer->setVelocity(velocity);
 
-        mainPlayer->update(dt.asSeconds());
-
         for (auto& [player, sprite] : playerSprites) {
             sprite.setPosition(player->getPosition());
             sprite.setRotation(player->getAngle());
@@ -415,35 +402,20 @@ int main() {
         gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
         gf::Vector2f ballPosition = ball.getPosition();
 
-        float mainPlayerSize = mainPlayer->getSize();
-        float ballSize = mainPlayerSize;
-
-        float mainPlayerLeft = mainPlayerPosition.x;
-        float mainPlayerRight = mainPlayerPosition.x + mainPlayerSize;
-        float mainPlayerTop = mainPlayerPosition.y;
-        float mainPlayerBottom = mainPlayerPosition.y + mainPlayerSize;
-
-        float ballLeft = ballPosition.x;
-        float ballRight = ballPosition.x + ballSize;
-        float ballTop = ballPosition.y;
-        float ballBottom = ballPosition.y + ballSize;
-
-        bool isColliding = (mainPlayerRight > ballLeft && mainPlayerLeft < ballRight &&
-                            mainPlayerBottom > ballTop && mainPlayerTop < ballBottom);
-
-        if (isColliding) {
-            ball.lockTo(mainPlayer);
-        }
-
         if (ball.isLockedTo(mainPlayer)) {
             ball.setVelocity(velocity);
         } else {
             ball.setVelocity(ball.getVelocity());
         }
 
-        ball.update(dt.asSeconds());
+        team.moveTeam(ball, mainPlayer);
+        team2.moveTeam(ball, mainPlayer);
 
-        int out = ball.isOutOfField(FIELDXSIZE, FIELDYSIZE, TOPPOLE, BOTTOMPOLE, TILESIZE);
+        ball.update(dt.asSeconds());
+        team.update(dt.asSeconds());
+        team2.update(dt.asSeconds());
+
+        int out = ball.isOutOfField(TILESIZE);
 
         checkOut(out, team.getPlayers(), ball.getLastTouchedBy());
 

@@ -7,6 +7,9 @@
 #include <gf/Color.h>
 #include <gf/Shapes.h>
 #include "player.h"
+#include "config.h"
+
+class Player;
 
 class Ball : public gf::Entity {
   private:
@@ -23,8 +26,8 @@ class Ball : public gf::Entity {
     Ball(float size, gf::Vector2f position, gf::Color4f color);
 
     gf::Vector2f getPosition() const;
-    float getSize() const;
     gf::Vector2f getVelocity() const; // Déplacé ici pour être public
+    float getSize() const;
 
     void setVelocity(gf::Vector2f velocity);
     void update(float dt);
@@ -32,7 +35,7 @@ class Ball : public gf::Entity {
     void unlock();
     bool isLockedTo(Player *p) const;
     void render(gf::RenderTarget& target);
-    int isOutOfField(int xsize, int ysize, int leftPole, int rightPole, int tileSize);
+    int isOutOfField(int tileSize);
     Player *getLastTouchedBy();
 
     bool isTouchingPlayer(const Player& player) const;

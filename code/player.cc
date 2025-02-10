@@ -193,7 +193,7 @@ gf::Vector2f Player::getPassVelocity(std::vector<Player *> players) {
     }
 }
 
-gf::Vector2f Player::getShootVelocity(float FIELDXSIZE, float FIELDYSIZE, float TOPPOLE, float BOTTOMPOLE, float ballSize, std::vector<Player *> teamPlayersVec) {
+gf::Vector2f Player::getShootVelocity(float ballSize, std::vector<Player *> teamPlayersVec) {
     float best_angle = m_angle;
     bool isMemberOfTeam = std::count(teamPlayersVec.begin(), teamPlayersVec.end(), this) > 0;
     float aimingX = isMemberOfTeam ? FIELDXSIZE : 0;
@@ -229,6 +229,88 @@ void Player::startSprint() {
 
 void Player::stopSprint() {
     m_isSprinting = false;
+}
+
+void Player::AImove(const Ball& ball, bool left, bool ballInTeam) {
+    /* DECISIONS FOR NOW :
+
+    Defenders should stay in their side's third and follow the ball
+    Midfielders should stay in the middle third of the field and follow the ball
+    Attackers should stay in the opponent's third of the field and follow the ball
+    Goalkeepers should stay in their side's tenth and between the poles and follow the ball
+
+    */
+    gf::Vector2f ballPos = ball.getPosition();
+
+    float leftThird = FIELDXSIZE / 3.0f;
+    float rightThird = 2.0f * FIELDXSIZE / 3.0f;
+    float middleThirdStart = leftThird;
+    float middleThirdEnd = rightThird;
+
+    float teamThirdStart = left ? 0.0f : rightThird;
+    float teamThirdEnd = left ? leftThird : FIELDXSIZE;
+    float enemyThirdStart = left ? rightThird : 0.0f;
+    float enemyThirdEnd = left ? FIELDXSIZE : leftThird;
+
+    float goalkeeperXStart = left ? 0 : FIELDXSIZE - FIELDXSIZE / 10.0f;
+    float goalkeeperXEnd = left ? FIELDXSIZE / 10.0f : FIELDXSIZE;
+
+    gf::Vector2f targetPosition;
+
+    switch (m_role) {
+        case Role::ATTACKER:
+            if (ballInTeam) {
+                // Move towards enemy goal
+                targetPosition.x = enemyThirdStart + (enemyThirdEnd - enemyThirdStart) / 2.0f;
+                targetPosition.y = FIELDYSIZE / 2.0f;
+            } else {
+                // Move towards the ball but stay in the enemy third
+                targetPosition.x = std::clamp(ballPos.x, enemyThirdStart, enemyThirdEnd);
+                targetPosition.y = std::clamp(ballPos.y, 0.0f, FIELDYSIZE);
+            }
+            break;
+
+        case Role::MIDFIELDER:
+            if (ballInTeam) {
+                // Stay in the middle third
+                targetPosition.x = middleThirdStart + (middleThirdEnd - middleThirdStart) / 2.0f;
+                targetPosition.y = FIELDYSIZE / 2.0f;
+            } else {
+                // Move towards the ball but stay in the middle third
+                targetPosition.x = std::clamp(ballPos.x, middleThirdStart, middleThirdEnd);
+                targetPosition.y = std::clamp(ballPos.y, 0.0f, FIELDYSIZE);
+            }
+            break;
+
+        case Role::DEFENDER:
+            if (ballInTeam) {
+                // Stay in the team's third
+                targetPosition.x = teamThirdStart + (teamThirdEnd - teamThirdStart) / 2.0f;
+                targetPosition.y = FIELDYSIZE / 2.0f;
+            } else {
+                // Move towards the ball but stay in the team's third
+                targetPosition.x = std::clamp(ballPos.x, teamThirdStart, teamThirdEnd);
+                targetPosition.y = std::clamp(ballPos.y, 0.0f, FIELDYSIZE);
+            }
+            break;
+
+        case Role::GOALKEEPER:
+            // Stay between the poles and in the team's tenth
+            targetPosition.x = std::clamp(ballPos.x, goalkeeperXStart, goalkeeperXEnd);
+            targetPosition.y = std::clamp(ballPos.y, TOPPOLE, BOTTOMPOLE);
+            break;
+    }
+
+    gf::Vector2f direction = targetPosition - m_position;
+
+    // Normalize the direction vector to ensure consistent speed
+    float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+    if (length > 0) {
+        direction /= length;
+    }
+
+    setVelocity(direction * SPEED);
+
 }
 
 //TEMPORARY 

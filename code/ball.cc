@@ -93,25 +93,25 @@ Player *Ball::getLastTouchedBy() {
     return lastTouchedBy;
 }
 
-int Ball::isOutOfField(int xsize, int ysize, int topPole, int bottomPole, int tileSize) {
+int Ball::isOutOfField(int tileSize) {
     //Because there is a little offset on the sides of the field of 8 pixels / 64 pixels in the tilesheet
     int offset = tileSize / 8;
     if (m_position.x + m_size < offset) {
-        if (m_position.y + m_size < topPole) {
+        if (m_position.y + m_size < TOPPOLE) {
             //Corner on topleft
             return 1;
-        }else if (m_position.y - m_size > bottomPole) {
+        }else if (m_position.y - m_size > BOTTOMPOLE) {
             //Corner on bottomleft
             return 3;
         }else {
             //Goal against left team
             return 2;
         }
-    }else if (m_position.x - m_size > xsize - offset) {
-        if (m_position.y + m_size < topPole) {
+    }else if (m_position.x - m_size > FIELDXSIZE - offset) {
+        if (m_position.y + m_size < TOPPOLE) {
             //Corner on topright
             return 6;
-        }else if (m_position.y - m_size > bottomPole) {
+        }else if (m_position.y - m_size > BOTTOMPOLE) {
             //Corner on bottomright
             return 8;
         }else {
@@ -122,7 +122,7 @@ int Ball::isOutOfField(int xsize, int ysize, int topPole, int bottomPole, int ti
         if (m_position.y + m_size < offset) {
             //Touch on top side
             return 4;
-        }else if (m_position.y - m_size > ysize - offset) {
+        }else if (m_position.y - m_size > FIELDYSIZE - offset) {
             //Touch on bottom side
             return 5;
         }else {

@@ -1,6 +1,4 @@
 #include "team.h"
-#include "player.h"
-#include "ball.h"
 
 #define PLAYERSIZE 30
 
@@ -51,10 +49,10 @@ void Team::initPlayers() {
     players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(20.0f, 20.0f), Role::DEFENDER, color, 0));
     players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(30.0f, 20.0f), Role::DEFENDER, color, 0));
     players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(40.0f, 20.0f), Role::DEFENDER, color, 0));
-    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(50.0f, 30.0f), Role::DEFENDER, color, 0));
+    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(50.0f, 30.0f), Role::MIDFIELDER, color, 0));
     players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(60.0f, 30.0f), Role::MIDFIELDER, color, 0));
     players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(70.0f, 30.0f), Role::MIDFIELDER, color, 0));
-    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(80.0f, 30.0f), Role::MIDFIELDER, color, 0));
+    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(80.0f, 30.0f), Role::ATTACKER, color, 0));
     players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(90.0f, 40.0f), Role::ATTACKER, color, 0));
     players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(100.0f, 40.0f), Role::ATTACKER, color, 0));
 }
@@ -88,6 +86,42 @@ void Team::setupPlayers(float fieldWidth, float fieldHeight) {
     players[8]->setPosition({attackX, yOffset - playerSpacingY});
     players[9]->setPosition({attackX, yOffset});
     players[10]->setPosition({attackX, yOffset + playerSpacingY});
+    
+    /*
+    TO REMOVE BEFORE THE END 
+    */
+
+    if (left) {
+        players[0]->changeColor(gf::Color::Blue);
+
+        players[1]->changeColor(gf::Color::Azure);
+        players[2]->changeColor(gf::Color::Azure);
+        players[3]->changeColor(gf::Color::Azure);
+        players[4]->changeColor(gf::Color::Azure);
+
+        players[5]->changeColor(gf::Color::Cyan);
+        players[6]->changeColor(gf::Color::Cyan);
+        players[7]->changeColor(gf::Color::Cyan);
+
+        players[8]->changeColor(gf::Color::Spring);
+        players[9]->changeColor(gf::Color::Spring);
+        players[10]->changeColor(gf::Color::Spring);
+    } else {
+        players[0]->changeColor(gf::Color::Red);
+
+        players[1]->changeColor(gf::Color::Orange);
+        players[2]->changeColor(gf::Color::Orange);
+        players[3]->changeColor(gf::Color::Orange);
+        players[4]->changeColor(gf::Color::Orange);
+
+        players[5]->changeColor(gf::Color::Rose);
+        players[6]->changeColor(gf::Color::Rose);
+        players[7]->changeColor(gf::Color::Rose);
+
+        players[8]->changeColor(gf::Color::Yellow);
+        players[9]->changeColor(gf::Color::Yellow);
+        players[10]->changeColor(gf::Color::Yellow);
+    }
 }
 
 
@@ -106,4 +140,20 @@ Player* Team::getClosestPlayerToBall(const Ball& ball) {
     }
 
     return closestPlayer;
+}
+
+void Team::moveTeam(Ball& ball, const Player *mainPlayer) {
+    Player *lastTouched = ball.getLastTouchedBy();
+    bool isBallMemberOfTeam = count(players.begin(), players.end(), lastTouched) > 0;
+    for (Player *player : players) {
+        if (player != mainPlayer) {
+            player->AImove(ball, left, isBallMemberOfTeam);
+        }
+    }
+}
+
+void Team::update(float dt) {
+    for (Player *player : players) {
+        player->update(dt);
+    }
 }

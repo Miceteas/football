@@ -7,6 +7,10 @@
 #include <gf/Color.h>
 #include <gf/Shapes.h>
 #include "role.h"
+#include "ball.h"
+#include "config.h"
+
+class Ball;
 
 class Player : public gf::Entity {
   private:
@@ -40,7 +44,7 @@ class Player : public gf::Entity {
     void render(gf::RenderTarget& target, bool isMainPlayer);
     float getAngle();
     gf::Vector2f getPassVelocity(std::vector<Player *> players);
-    gf::Vector2f getShootVelocity(float FIELDXSIZE, float FIELDYSIZE, float TOPPOLE, float BOTTOMPOLE, float ballSize, std::vector<Player *> teamPlayersVec);
+    gf::Vector2f getShootVelocity(float ballSize, std::vector<Player *> teamPlayersVec);
 
     void setTackleData(float speed, float angle);
     bool isTackling() const;
@@ -49,6 +53,7 @@ class Player : public gf::Entity {
     void handleCollision(Player& other);
     void startSprint();
     void stopSprint();
+    void AImove(const Ball& ball, bool left, bool isBallMemberOfTeam);
   
     //TEMPORARY 
     void changeColor(gf::Color4f color);
