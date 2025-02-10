@@ -337,6 +337,18 @@ int main() {
             if (ball.isTouchingPlayer(*player)) {
                 ball.lockTo(player);
             }
+
+            for (Player* other : team.getPlayers()) {
+                if (player != other) {
+                    player->handleCollision(*other);
+                }
+            }
+
+            for (Player* other : team2.getPlayers()) {
+                if (player != other) {
+                    player->handleCollision(*other);
+                }
+            }
         }
 
         if (ball.isLockedTo(mainPlayer)) {
