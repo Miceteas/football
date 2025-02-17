@@ -352,6 +352,11 @@ int main() {
         }
 
         if (ball.isLockedTo(mainPlayer)) {
+            mainPlayer->reduceSpeed();
+            if (sprintAction.isActive()) {
+                ball.unlock();
+                ball.setVelocity(mainPlayer->getSelfPassVelocity());
+            }
             if (passAction.isActive()) {
                 ball.unlock();
                 ball.setVelocity(mainPlayer->getPassVelocity(team.getPlayers()));

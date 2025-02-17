@@ -1,5 +1,6 @@
 #include "player.h"
 
+#define BALL_VELOCITY 370.0f
 #define PASS_VELOCITY 400.0f
 #define SHOOT_VELOCITY 600.0f
 #define SLIDE_DISTANCE 150.0f
@@ -23,6 +24,7 @@ Player::Player(float stamina, float size, gf::Vector2f position, Role role, gf::
 , m_tackleAngle(0.0f)
 , m_tackleVelocity({0, 0})
 , m_isSprinting(false)
+, m_reduceSpeed(false)
 {
     
 }
@@ -65,6 +67,10 @@ void Player::setTackleData(float speed, float angle) {
 
 bool Player::isTackling() const {
     return m_isTackling;
+}
+
+void Player::reduceSpeed(){
+    m_reduceSpeed = true;
 }
 
 void Player::freeze(float duration) {
@@ -134,6 +140,9 @@ void Player::update(float dt) {
             if (m_isSprinting) {
                 m_velocity *= 1.5f;
             }
+            if (m_reduceSpeed){
+                m_velocity *= 0.8f;
+            }
             m_position += dt * m_velocity;
         } else {
             m_velocity = {0.0f, 0.0f};
@@ -163,6 +172,11 @@ void Player::render(gf::RenderTarget& target, bool isMainPlayer) {
 float Player::getAngle() {
     return m_angle;
 }
+
+gf::Vector2f Player::getSelfPassVelocity() {
+    return {std::cos(m_angle) * BALL_VELOCITY, std::sin(m_angle) * BALL_VELOCITY};
+}
+
 
 gf::Vector2f Player::getPassVelocity(std::vector<Player *> players) {
     float bestAngle = 0;

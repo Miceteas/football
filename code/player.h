@@ -28,6 +28,7 @@ class Player : public gf::Entity {
     float m_tackleAngle;
     gf::Vector2f m_tackleVelocity;
     bool m_isSprinting;
+    bool m_reduceSpeed;
 
     float calcAngle(gf::Vector2f velocity);
 
@@ -43,6 +44,7 @@ class Player : public gf::Entity {
     void update(float dt);
     void render(gf::RenderTarget& target, bool isMainPlayer);
     float getAngle();
+    gf::Vector2f getSelfPassVelocity();
     gf::Vector2f getPassVelocity(std::vector<Player *> players);
     gf::Vector2f getShootVelocity(float ballSize, std::vector<Player *> teamPlayersVec);
 
@@ -54,6 +56,7 @@ class Player : public gf::Entity {
     void startSprint();
     void stopSprint();
     void AImove(const Ball& ball, bool left, bool isBallMemberOfTeam);
+    void reduceSpeed();
   
     //TEMPORARY 
     void changeColor(gf::Color4f color);
