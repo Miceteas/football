@@ -425,7 +425,7 @@ int main() {
             ball.setVelocity(ball.getVelocity());
         }
 
-        team.moveTeam(ball, mainPlayer);
+        // team.moveTeam(ball, mainPlayer);
         team2.moveTeam(ball, mainPlayer);
 
         ball.update(dt.asSeconds());

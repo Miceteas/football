@@ -93,6 +93,10 @@ Player *Ball::getLastTouchedBy() {
     return lastTouchedBy;
 }
 
+Player *Ball::getLockedTo() {
+    return belongsTo;
+}
+
 int Ball::isOutOfField(int tileSize) {
     //Because there is a little offset on the sides of the field of 8 pixels / 64 pixels in the tilesheet
     int offset = tileSize / 8;

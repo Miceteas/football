@@ -143,11 +143,11 @@ Player* Team::getClosestPlayerToBall(const Ball& ball) {
 }
 
 void Team::moveTeam(Ball& ball, const Player *mainPlayer) {
-    Player *lastTouched = ball.getLastTouchedBy();
+    Player *lastTouched = ball.getLockedTo();
     bool isBallMemberOfTeam = count(players.begin(), players.end(), lastTouched) > 0;
     for (Player *player : players) {
         if (player != mainPlayer) {
-            player->AImove(ball, left, isBallMemberOfTeam);
+            player->AImove(ball, left, isBallMemberOfTeam, players);
         }
     }
 }

@@ -31,6 +31,8 @@ class Player : public gf::Entity {
     bool m_reduceSpeed;
 
     float calcAngle(gf::Vector2f velocity);
+    float getClosestUpY(std::vector<Player *> teamPlayersVec);
+    float getClosestDownY(std::vector<Player *> teamPlayersVec);
 
   public:
     Player(float stamina, float size, gf::Vector2f position, Role role, gf::Color4f color, float angle);
@@ -55,7 +57,7 @@ class Player : public gf::Entity {
     void handleCollision(Player& other);
     void startSprint();
     void stopSprint();
-    void AImove(const Ball& ball, bool left, bool isBallMemberOfTeam);
+    void AImove(Ball& ball, bool left, bool isBallMemberOfTeam, std::vector<Player *> teamPlayersVec);
     void reduceSpeed();
   
     //TEMPORARY 

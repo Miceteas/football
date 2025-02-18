@@ -245,7 +245,7 @@ void Player::stopSprint() {
     m_isSprinting = false;
 }
 
-void Player::AImove(const Ball& ball, bool left, bool ballInTeam) {
+void Player::AImove(Ball& ball, bool left, bool ballInTeam, std::vector<Player *> teamPlayersVec) {
     /* DECISIONS FOR NOW :
 
     Defenders should stay in their side's third and follow the ball
@@ -271,40 +271,80 @@ void Player::AImove(const Ball& ball, bool left, bool ballInTeam) {
 
     gf::Vector2f targetPosition;
 
+    float aboveY = getClosestUpY(teamPlayersVec);
+    float belowY = getClosestDownY(teamPlayersVec);
+    float dispertion = 0;
+
     switch (m_role) {
         case Role::ATTACKER:
             if (ballInTeam) {
                 // Move towards enemy goal
-                targetPosition.x = enemyThirdStart + (enemyThirdEnd - enemyThirdStart) / 2.0f;
-                targetPosition.y = FIELDYSIZE / 2.0f;
+                // Attackers should stay around 300 pixels vertical from each other
+                dispertion = 300;
+                targetPosition.x = enemyThirdStart;
+                if (ball.isLockedTo(this)) {
+                    targetPosition.y = FIELDYSIZE / 2;
+                    if ((m_position.x < enemyThirdStart + FIELDXSIZE / 10 + 200)) {
+                        ball.unlock();
+                        ball.setVelocity(getShootVelocity(ball.getSize(), teamPlayersVec));
+                    }
+                }else {                    
+                    targetPosition.y = std::clamp(ballPos.y, aboveY + dispertion, belowY - dispertion);
+                }
             } else {
                 // Move towards the ball but stay in the enemy third
+                // Attackers should stay around 50 pixels vertical from each other
+                dispertion = 50;
                 targetPosition.x = std::clamp(ballPos.x, enemyThirdStart, enemyThirdEnd);
-                targetPosition.y = std::clamp(ballPos.y, 0.0f, FIELDYSIZE);
+                targetPosition.y = std::clamp(ballPos.y, aboveY + dispertion, belowY - dispertion);
             }
             break;
 
         case Role::MIDFIELDER:
             if (ballInTeam) {
                 // Stay in the middle third
-                targetPosition.x = middleThirdStart + (middleThirdEnd - middleThirdStart) / 2.0f;
-                targetPosition.y = FIELDYSIZE / 2.0f;
+                // Midfielders should stay around 200 pixels vertical from each other
+                dispertion = 200;
+                targetPosition.x = middleThirdStart;
+                if (ball.isLockedTo(this)) {
+                    targetPosition.y = FIELDYSIZE / 2;
+                    if ((m_position.x < middleThirdStart + 100)) {
+                        ball.unlock();
+                        ball.setVelocity(getPassVelocity(teamPlayersVec));
+                    }
+                }else {                    
+                    targetPosition.y = std::clamp(ballPos.y, aboveY + dispertion, belowY - dispertion);
+                }
             } else {
                 // Move towards the ball but stay in the middle third
+                // Midfielders should stay around 50 pixels vertical from each other
+                dispertion = 50;
                 targetPosition.x = std::clamp(ballPos.x, middleThirdStart, middleThirdEnd);
-                targetPosition.y = std::clamp(ballPos.y, 0.0f, FIELDYSIZE);
+                targetPosition.y = std::clamp(ballPos.y, aboveY + dispertion, belowY - dispertion);
             }
             break;
 
         case Role::DEFENDER:
             if (ballInTeam) {
                 // Stay in the team's third
-                targetPosition.x = teamThirdStart + (teamThirdEnd - teamThirdStart) / 2.0f;
-                targetPosition.y = FIELDYSIZE / 2.0f;
+                // Defenders should stay around 25 pixels vertical from each other
+                dispertion = 25;
+                targetPosition.x = teamThirdStart;
+                if (ball.isLockedTo(this)) {
+                    targetPosition.y = FIELDYSIZE / 2;
+                    if ((m_position.x < teamThirdStart + 100)) {
+                        ball.unlock();
+                        ball.setVelocity(getPassVelocity(teamPlayersVec));
+                    }
+                }else {                    
+                    targetPosition.y = std::clamp(ballPos.y, aboveY + dispertion, belowY - dispertion);
+                }
             } else {
                 // Move towards the ball but stay in the team's third
+                // Defenders should stay around 100 pixels vertical from each other
+                dispertion = 100;
                 targetPosition.x = std::clamp(ballPos.x, teamThirdStart, teamThirdEnd);
-                targetPosition.y = std::clamp(ballPos.y, 0.0f, FIELDYSIZE);
+                targetPosition.y = std::clamp(ballPos.y, aboveY + dispertion, belowY - dispertion);
             }
             break;
 
@@ -325,6 +365,32 @@ void Player::AImove(const Ball& ball, bool left, bool ballInTeam) {
 
     setVelocity(direction * SPEED);
 
+}
+
+float Player::getClosestUpY(std::vector<Player *> teamPlayersVec) {
+    float y = 0;
+    for (Player *p : teamPlayersVec) {
+        if (p != this && p->m_role == m_role) {
+            gf::Vector2f pos = p->getPosition();
+            if (pos.y > y && pos.y < m_position.y) {
+                y = pos.y;
+            }
+        }
+    }
+    return y;
+}
+
+float Player::getClosestDownY(std::vector<Player *> teamPlayersVec) {
+    float y = FIELDYSIZE;
+    for (Player *p : teamPlayersVec) {
+        if (p != this && p->m_role == m_role) {
+            gf::Vector2f pos = p->getPosition();
+            if (pos.y < y && pos.y > m_position.y) {
+                y = pos.y;
+            }
+        }
+    }
+    return y;
 }
 
 //TEMPORARY 
