@@ -116,7 +116,9 @@ int main() {
     // setup resource directory
     gf::ResourceManager resourceManager;
     resourceManager.addSearchDir(FOOTBALL_DATA_DIR);
-    //resourceManager.addSearchDir("./assets");
+    
+    gf::ResourceManager resourceManager2;
+    resourceManager.addSearchDir ("/home/kei/Documents/S6/football/assets/PNG/Blue");
 
     gf::Random random;
 
@@ -206,10 +208,10 @@ int main() {
 
     // Initialize a team with 11 players
     Team team("Team A", gf::Color::Azure);
-    team.initPlayers();  // Initialize the players
+    team.initPlayers(resourceManager2);  // Initialize the players
 
     Team team2("Team B", gf::Color::Chartreuse);
-    team2.initPlayers();
+    team2.initPlayers(resourceManager2);
     team2.setupSide(false);
 
     // Texture players

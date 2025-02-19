@@ -6,6 +6,8 @@
 #include <gf/RenderTarget.h>
 #include <gf/Color.h>
 #include <gf/Shapes.h>
+#include <gf/Sprite.h>
+#include <gf/Texture.h>
 #include "role.h"
 #include "ball.h"
 #include "config.h"
@@ -29,6 +31,9 @@ class Player : public gf::Entity {
     gf::Vector2f m_tackleVelocity;
     bool m_isSprinting;
 
+    gf::Sprite m_sprite;
+    gf::Texture* m_texture;
+
     float calcAngle(gf::Vector2f velocity);
 
   public:
@@ -46,6 +51,8 @@ class Player : public gf::Entity {
     gf::Vector2f getPassVelocity(std::vector<Player *> players);
     gf::Vector2f getShootVelocity(float ballSize, std::vector<Player *> teamPlayersVec);
 
+    Role getRole() const;
+
     void setTackleData(float speed, float angle);
     bool isTackling() const;
     bool collidesWith(const Player& other) const;
@@ -57,6 +64,9 @@ class Player : public gf::Entity {
   
     //TEMPORARY 
     void changeColor(gf::Color4f color);
+
+    void setTexture(gf::Texture& texture);
+    void updateSpritePosition();
 };
 
 #endif

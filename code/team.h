@@ -6,6 +6,7 @@
 #include <vector>
 #include <iosfwd>
 #include <iostream>
+#include <gf/ResourceManager.h>
 #include "role.h"
 
 #include "player.h"
@@ -35,7 +36,7 @@ class Team {
         void putPlayerBench(Player *p);
         std::vector<Player*> getPlayers();
 
-        void initPlayers();
+        void initPlayers(gf::ResourceManager& resources);
         void setupPlayers(float fieldWidth, float fieldHeight);
         Player* getClosestPlayerToBall(const Ball& ball);
         void moveTeam(Ball& ball, const Player *mainPlayer);

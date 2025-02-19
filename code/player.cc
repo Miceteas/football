@@ -27,6 +27,11 @@ Player::Player(float stamina, float size, gf::Vector2f position, Role role, gf::
     
 }
 
+Role Player::getRole() const { 
+    return m_role; 
+}
+
+
 float Player::getSize() const {
     return m_size;
 }
@@ -51,8 +56,21 @@ void Player::setVelocity(gf::Vector2f velocity) {
     m_angle = calcAngle(velocity);
 }
 
+void Player::setTexture(gf::Texture& texture) {
+    m_sprite.setTexture(texture);
+    m_sprite.setAnchor(gf::Anchor::Center); // Si tu veux centrer le sprite sur la position du joueur
+    updateSpritePosition();
+}
+
+void Player::updateSpritePosition() {
+    if (m_texture) {
+        m_sprite.setPosition(m_position);
+    }
+}
+
 void Player::setPosition(gf::Vector2f position) {
     m_position = position;
+    Player::updateSpritePosition();
 }
 
 void Player::setTackleData(float speed, float angle) {
@@ -142,14 +160,20 @@ void Player::update(float dt) {
 }
 
 void Player::render(gf::RenderTarget& target, bool isMainPlayer) {
-    gf::RectangleShape shape({m_size, m_size});
-    shape.setPosition(m_position);
-    shape.setAnchor(gf::Anchor::Center);
-    shape.setOutlineThickness(0.5f);
-    shape.setColor(m_color);
-    shape.setOutlineColor(gf::Color::darker(m_color));
-    shape.setRotation(m_angle);
-    target.draw(shape);
+    if (m_texture) {
+        m_sprite.setPosition(m_position);
+        m_sprite.setRotation(m_angle); // Si tu veux que la texture tourne avec l'angle
+        target.draw(m_sprite);
+    } else {
+        gf::RectangleShape shape({m_size, m_size});
+        shape.setPosition(m_position);
+        shape.setAnchor(gf::Anchor::Center);
+        shape.setOutlineThickness(0.5f);
+        shape.setColor(m_color);
+        shape.setOutlineColor(gf::Color::darker(m_color));
+        shape.setRotation(m_angle);
+        target.draw(shape);
+    }
 
     if (isMainPlayer) {
         gf::RectangleShape square({m_size * 0.4f, m_size * 0.4f});
@@ -159,6 +183,8 @@ void Player::render(gf::RenderTarget& target, bool isMainPlayer) {
         target.draw(square);
     }
 }
+
+
 
 float Player::getAngle() {
     return m_angle;

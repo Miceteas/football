@@ -43,7 +43,14 @@ void Team::showBenchPlayers(gf::RenderTarget& target) {
     }
 }
 
-void Team::initPlayers() {
+void Team::initPlayers(gf::ResourceManager& resources) {
+    std::map<Role, std::string> roleTextures = {
+        { Role::GOALKEEPER, "goalkeeper.png" },
+        { Role::DEFENDER, "defender.png" },
+        { Role::MIDFIELDER, "midfielder.png" },
+        { Role::ATTACKER, "attacker.png" }
+    };
+
     players.push_back(new Player(100.0f, PLAYERSIZE, gf::Vector2f(0.0f, 0.0f), Role::GOALKEEPER, color, 0));
     players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(10.0f, 20.0f), Role::DEFENDER, color, 0));
     players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(20.0f, 20.0f), Role::DEFENDER, color, 0));
@@ -55,6 +62,16 @@ void Team::initPlayers() {
     players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(80.0f, 30.0f), Role::ATTACKER, color, 0));
     players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(90.0f, 40.0f), Role::ATTACKER, color, 0));
     players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(100.0f, 40.0f), Role::ATTACKER, color, 0));
+
+    // Attribution des textures
+    for (Player* p : players) {
+        Role role = p->getRole(); 
+        auto it = roleTextures.find(role);
+        if (it != roleTextures.end()) {
+            gf::Texture& texture = resources.getTexture(it->second);
+            p->setTexture(texture);
+        }
+    }
 }
 
 // need to have small changes for final product!!! But is good enough
