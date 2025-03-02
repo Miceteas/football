@@ -6,11 +6,6 @@ project(FOOTBALL
 )
 
 # Configurer le fichier config.h
-set(FIELDXSIZE 3200.0f)
-set(FIELDYSIZE 1664.0f)
-set(TOPPOLE 640.0f)
-set(BOTTOMPOLE 1024.0f)
-set(SPEED 240.0f)
 set(FOOTBALL_DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/code/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 

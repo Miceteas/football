@@ -8,6 +8,7 @@
 #include <gf/Shapes.h>
 #include "player.h"
 #include "config.h"
+#include "settings.h"
 
 class Player;
 

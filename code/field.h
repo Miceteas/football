@@ -6,6 +6,7 @@
 #include <gf/Texture.h>
 #include <vector>
 #include <string>
+#include "settings.h"
 
 class FootballField {
     public:

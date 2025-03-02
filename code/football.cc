@@ -29,19 +29,13 @@
 #include <gf/TileLayer.h>
 
 #include "config.h"
+#include "settings.h"
 #include "ball.h"
 #include "player.h"
 #include "role.h"
 #include "team.h"
 #include "field.h"
 #include "minimap.h"
-
-#define BALLSIZE 10
-#define PLAYERSIZE 30
-#define FIELD_X_TILES 25
-#define FIELD_Y_TILES 13
-#define TILESIZE 128
-
 
 void touch(bool isTop, bool forPlayerTeam) {
   //Do something for a touch

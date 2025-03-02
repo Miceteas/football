@@ -1,14 +1,5 @@
 #include "player.h"
 
-#define BALL_VELOCITY 370.0f
-#define PASS_VELOCITY 400.0f
-#define SHOOT_VELOCITY 600.0f
-#define SLIDE_DISTANCE 150.0f
-#define TACKLE_FRICTION 150.0f
-#define MIN_SLIDE_SPEED 5.0f
-#define MAX_PASS_DISTANCE 300.0f
-#define MAX_SHOOT_DISTANCE 1200.0f
-
 Player::Player(float stamina, float size, gf::Vector2f position, Role role, gf::Color4f color, float angle)
 : m_stamina(stamina)
 , m_velocity({0, 0})

@@ -1,8 +1,5 @@
 #include "team.h"
 
-#define PLAYERSIZE 30
-
-
 std::string Team::getName() {
     return name;
 }

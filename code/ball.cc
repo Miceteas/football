@@ -1,7 +1,5 @@
 #include "ball.h"
 
-#define BASECOOLDOWN 0.2
-
 Ball::Ball(float size, gf::Vector2f position, gf::Color4f color)
 : m_velocity({0, 0})
 , m_size(size)

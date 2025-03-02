@@ -9,6 +9,7 @@
 #include "role.h"
 #include "ball.h"
 #include "config.h"
+#include "settings.h"
 
 class Ball;
 

@@ -7,6 +7,7 @@
 #include <gf/RenderTarget.h>
 #include <gf/Vector.h>
 #include "field.h"
+#include "settings.h"
 
 class Minimap {
 public:

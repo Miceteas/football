@@ -11,6 +11,7 @@
 #include "player.h"
 #include "ball.h"
 #include "config.h"
+#include "settings.h"
 
 class Team {
     private:
