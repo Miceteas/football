@@ -7,6 +7,7 @@
 #include <iosfwd>
 #include <iostream>
 #include "role.h"
+#include "side.h"
 
 #include "player.h"
 #include "ball.h"

@@ -7,6 +7,7 @@
 #include <gf/Color.h>
 #include <gf/Shapes.h>
 #include "role.h"
+#include "side.h"
 #include "ball.h"
 #include "config.h"
 #include "settings.h"
@@ -20,6 +21,7 @@ class Player : public gf::Entity {
     float m_size;
     gf::Vector2f m_position;
     Role m_role;
+    Side m_side;
     gf::Color4f m_color;
     float m_angle;
     float m_freezeTime;
@@ -31,12 +33,11 @@ class Player : public gf::Entity {
     bool m_isSprinting;
     bool m_reduceSpeed;
 
+    void setAim(std::vector<Player *> teamPlayersVec, bool left);
     float calcAngle(gf::Vector2f velocity);
-    float getClosestUpY(std::vector<Player *> teamPlayersVec);
-    float getClosestDownY(std::vector<Player *> teamPlayersVec);
 
   public:
-    Player(float stamina, float size, gf::Vector2f position, Role role, gf::Color4f color, float angle);
+    Player(float stamina, float size, gf::Vector2f position, Role role, Side side, gf::Color4f color, float angle);
 
     float getSize() const;
     gf::Vector2f getPosition() const;

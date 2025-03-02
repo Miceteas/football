@@ -41,17 +41,17 @@ void Team::showBenchPlayers(gf::RenderTarget& target) {
 }
 
 void Team::initPlayers() {
-    players.push_back(new Player(100.0f, PLAYERSIZE, gf::Vector2f(0.0f, 0.0f), Role::GOALKEEPER, color, 0));
-    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(10.0f, 20.0f), Role::DEFENDER, color, 0));
-    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(20.0f, 20.0f), Role::DEFENDER, color, 0));
-    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(30.0f, 20.0f), Role::DEFENDER, color, 0));
-    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(40.0f, 20.0f), Role::DEFENDER, color, 0));
-    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(50.0f, 30.0f), Role::MIDFIELDER, color, 0));
-    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(60.0f, 30.0f), Role::MIDFIELDER, color, 0));
-    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(70.0f, 30.0f), Role::MIDFIELDER, color, 0));
-    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(80.0f, 30.0f), Role::ATTACKER, color, 0));
-    players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(90.0f, 40.0f), Role::ATTACKER, color, 0));
-    players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(100.0f, 40.0f), Role::ATTACKER, color, 0));
+    players.push_back(new Player(100.0f, PLAYERSIZE, gf::Vector2f(0.0f, 0.0f), Role::GOALKEEPER, Side::MIDDLE, color, 0));
+    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(10.0f, 20.0f), Role::DEFENDER, Side::TOP,  color, 0));
+    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(20.0f, 20.0f), Role::DEFENDER, Side::MIDDLE, color, 0));
+    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(30.0f, 20.0f), Role::DEFENDER, Side::MIDDLE, color, 0));
+    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(40.0f, 20.0f), Role::DEFENDER, Side::BOTTOM, color, 0));
+    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(50.0f, 30.0f), Role::MIDFIELDER, Side::TOP, color, 0));
+    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(60.0f, 30.0f), Role::MIDFIELDER, Side::MIDDLE, color, 0));
+    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(70.0f, 30.0f), Role::MIDFIELDER, Side::BOTTOM, color, 0));
+    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(80.0f, 30.0f), Role::ATTACKER, Side::TOP, color, 0));
+    players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(90.0f, 40.0f), Role::ATTACKER, Side::MIDDLE, color, 0));
+    players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(100.0f, 40.0f), Role::ATTACKER, Side::BOTTOM, color, 0));
 }
 
 // need to have small changes for final product!!! But is good enough
