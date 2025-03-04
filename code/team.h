@@ -16,15 +16,16 @@
 
 class Team {
     private:
-        std::string name;
-        gf::Color4f color;
-        std::vector<Player*> players;
-        std::vector<Player*> bench;
-        int setup;
-        bool left;
+        std::string m_name;
+        gf::Color4f m_color;
+        std::vector<Player*> m_players;
+        std::vector<Player*> m_bench;
+        int m_setup;
+        bool m_left;
+        int m_goals;
 
     public :
-        Team(std::string name, gf::Color4f color) : name(name), color(color), setup(0), left(true) {}
+        Team(std::string name, gf::Color4f color);
         std::string getName();
         gf::Color4f getColor();
         void changeSetup(int setup);
@@ -38,9 +39,11 @@ class Team {
         std::vector<Player*> getPlayers();
 
         void initPlayers();
-        void setupPlayers(float fieldWidth, float fieldHeight);
+        void setupPlayers();
         Player* getClosestPlayerToBall(const Ball& ball);
         void moveTeam(Ball& ball, const Player *mainPlayer);
         void update(float dt);
+        void addGoal();
+        int getGoals();
 };
 

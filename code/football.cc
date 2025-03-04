@@ -100,7 +100,15 @@ gf::Vector2f normalizeVelocity(gf::Vector2f velocity) {
     return ret;
 }
 
-
+void endMatch(int playerGoals, int aiGoals) {
+    if (playerGoals < aiGoals) {
+        //YOU LOSE
+    } else if (playerGoals == aiGoals) {
+        //YOU TIE
+    } else {
+        //YOU WIN CHAMPION !!!!
+    }
+}
 
 int main() {
     static constexpr gf::Vector2u ScreenSize(800, 800);
@@ -226,8 +234,8 @@ int main() {
     
     
     // default setup
-    team.setupPlayers(FIELD_X_TILES*TILESIZE,FIELD_Y_TILES*TILESIZE);
-    team2.setupPlayers(FIELD_X_TILES*TILESIZE,FIELD_Y_TILES*TILESIZE);
+    team.setupPlayers();
+    team2.setupPlayers();
 
     std::unordered_map<Player*, gf::Sprite> playerSprites;
     std::unordered_map<Player*, gf::Sprite> playerSprites2;
@@ -262,9 +270,10 @@ int main() {
 
     Player* mainPlayer = team.getPlayers()[10]; 
 
-    // main loop
-    bool cam1 = true;
+    float currSeconds = 0;
+    float currMinutes = 0;
 
+    // main loop
 
     while (window.isOpen()) {
         // inputs
@@ -386,13 +395,10 @@ int main() {
         }
 
         if (switchAction.isActive() && !mainPlayer->isTackling() && !ball.isLockedTo(mainPlayer)) {
-            if (cam1) {
-                Player* closestPlayer = team.getClosestPlayerToBall(ball);
-                if (closestPlayer) {
-                    mainPlayer = closestPlayer;
-                }
+            Player* closestPlayer = team.getClosestPlayerToBall(ball);
+            if (closestPlayer) {
+                mainPlayer = closestPlayer;
             }
-            cam1 = !cam1;
         }
 
         actions.reset();
@@ -436,6 +442,21 @@ int main() {
             view.setCenter(ball.getPosition());
         }
 
+        if (!out) {
+            currSeconds += dt.asSeconds();
+    
+            if (currSeconds >= BASETIMEOFMINUTE) {
+                ++currMinutes;
+                currSeconds = 0;
+            }
+
+            if (currMinutes >= 90) {
+                endMatch(team.getGoals(), team2.getGoals());
+            }
+        }
+
+
+
         std::vector<int> tileOrder = {
             // Row 1
             5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6,
@@ -470,7 +491,7 @@ int main() {
 
         //Minimap minimap(field, 0.2f); // 0.2f is the scale for the minimap
         //minimap.setPosition(10.0f, 10.0f); // Position in the top-left corner
-
+        
         // Main loop (rendering section)
         renderer.clear();
 

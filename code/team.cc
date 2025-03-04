@@ -1,123 +1,136 @@
 #include "team.h"
 
+Team::Team(std::string name, gf::Color4f color)
+: m_name(name)
+, m_color(color)
+, m_setup(0)
+, m_left(true) 
+, m_goals(0)
+{
+
+} 
+
 std::string Team::getName() {
-    return name;
+    return m_name;
 }
 
 gf::Color4f Team::getColor() {
-    return color;
+    return m_color;
 }
 
-void changeSetup(int setup) {
-    setup = setup;
+int Team::getGoals() {
+    return m_goals;
+}
+
+void Team::changeSetup(int setup) {
+    m_setup = setup;
 }
 
 void Team::addPlayer(Player *p) {
-    players.push_back(p);
+    m_players.push_back(p);
 }
 
 void Team::putPlayerBench(Player *p) {
-    bench.push_back(p);
+    m_bench.push_back(p);
 }
 
 void Team::setupSide(bool side){
-    left = side;
+    m_left = side;
 }
 
 void Team::showActivePlayers(gf::RenderTarget& target) {
-    for (Player *p : players) {
+    for (Player *p : m_players) {
         p->render(target,false); 
     }
 }
 
 std::vector<Player*> Team::getPlayers(){
-    return players;
+    return m_players;
 }
 
 void Team::showBenchPlayers(gf::RenderTarget& target) {
-    for (Player *p : bench) {
+    for (Player *p : m_bench) {
         p->render(target,false);
     }
 }
 
 void Team::initPlayers() {
-    players.push_back(new Player(100.0f, PLAYERSIZE, gf::Vector2f(0.0f, 0.0f), Role::GOALKEEPER, Side::MIDDLE, color, 0));
-    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(10.0f, 20.0f), Role::DEFENDER, Side::TOP,  color, 0));
-    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(20.0f, 20.0f), Role::DEFENDER, Side::MIDDLE, color, 0));
-    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(30.0f, 20.0f), Role::DEFENDER, Side::MIDDLE, color, 0));
-    players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(40.0f, 20.0f), Role::DEFENDER, Side::BOTTOM, color, 0));
-    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(50.0f, 30.0f), Role::MIDFIELDER, Side::TOP, color, 0));
-    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(60.0f, 30.0f), Role::MIDFIELDER, Side::MIDDLE, color, 0));
-    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(70.0f, 30.0f), Role::MIDFIELDER, Side::BOTTOM, color, 0));
-    players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(80.0f, 30.0f), Role::ATTACKER, Side::TOP, color, 0));
-    players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(90.0f, 40.0f), Role::ATTACKER, Side::MIDDLE, color, 0));
-    players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(100.0f, 40.0f), Role::ATTACKER, Side::BOTTOM, color, 0));
+    m_players.push_back(new Player(100.0f, PLAYERSIZE, gf::Vector2f(0.0f, 0.0f), Role::GOALKEEPER, Side::MIDDLE, m_color, 0));
+    m_players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(10.0f, 20.0f), Role::DEFENDER, Side::TOP,  m_color, 0));
+    m_players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(20.0f, 20.0f), Role::DEFENDER, Side::MIDDLE, m_color, 0));
+    m_players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(30.0f, 20.0f), Role::DEFENDER, Side::MIDDLE, m_color, 0));
+    m_players.push_back(new Player(90.0f, PLAYERSIZE, gf::Vector2f(40.0f, 20.0f), Role::DEFENDER, Side::BOTTOM, m_color, 0));
+    m_players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(50.0f, 30.0f), Role::MIDFIELDER, Side::TOP, m_color, 0));
+    m_players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(60.0f, 30.0f), Role::MIDFIELDER, Side::MIDDLE, m_color, 0));
+    m_players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(70.0f, 30.0f), Role::MIDFIELDER, Side::BOTTOM, m_color, 0));
+    m_players.push_back(new Player(85.0f, PLAYERSIZE, gf::Vector2f(80.0f, 30.0f), Role::ATTACKER, Side::TOP, m_color, 0));
+    m_players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(90.0f, 40.0f), Role::ATTACKER, Side::MIDDLE, m_color, 0));
+    m_players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(100.0f, 40.0f), Role::ATTACKER, Side::BOTTOM, m_color, 0));
 }
 
-// need to have small changes for final product!!! But is good enough
-void Team::setupPlayers(float fieldWidth, float fieldHeight) {
-    float xOffset = left ? 0.1f * fieldWidth : fieldWidth - 0.1f * fieldWidth;
-    float yOffset = fieldHeight / 2.0f;
-    float playerSpacingY = fieldHeight / 5.0f;
-    float playerSpacingX = fieldWidth / 10.0f;
+void Team::setupPlayers() {
+    float xOffset = m_left ? 0.1f * FIELDXSIZE : FIELDXSIZE - 0.1f * FIELDXSIZE;
+    float yOffset = FIELDYSIZE / 2.0f;
+    float playerSpacingY = FIELDYSIZE / 5.0f;
+    float playerSpacingX = FIELDXSIZE / 10.0f;
 
     // Goalkeeper
-    players[0]->setVelocity({0.0f, 0.0f});
-    players[0]->setPosition({xOffset, yOffset});
+    m_players[0]->setVelocity({0.0f, 0.0f});
+    m_players[0]->setPosition({xOffset, yOffset});
 
     // Défense (4 joueurs)
-    float defenseX = xOffset + (left ? 1 : -1) * playerSpacingX;
-    players[1]->setPosition({defenseX, yOffset - 1.5f * playerSpacingY});
-    players[2]->setPosition({defenseX, yOffset - 0.5f * playerSpacingY});
-    players[3]->setPosition({defenseX, yOffset + 0.5f * playerSpacingY});
-    players[4]->setPosition({defenseX, yOffset + 1.5f * playerSpacingY});
+    float defenseX = xOffset + (m_left ? 1 : -1) * playerSpacingX;
+    m_players[1]->setPosition({defenseX, yOffset - 1.5f * playerSpacingY});
+    m_players[2]->setPosition({defenseX, yOffset - 0.5f * playerSpacingY});
+    m_players[3]->setPosition({defenseX, yOffset + 0.5f * playerSpacingY});
+    m_players[4]->setPosition({defenseX, yOffset + 1.5f * playerSpacingY});
 
     // Milieu de terrain (3 joueurs)
-    float midfieldX = defenseX + (left ? 1 : -1) * playerSpacingX;
-    players[5]->setPosition({midfieldX, yOffset - playerSpacingY});
-    players[6]->setPosition({midfieldX, yOffset});
-    players[7]->setPosition({midfieldX, yOffset + playerSpacingY});
+    float midfieldX = defenseX + (m_left ? 1 : -1) * playerSpacingX;
+    m_players[5]->setPosition({midfieldX, yOffset - playerSpacingY});
+    m_players[6]->setPosition({midfieldX, yOffset});
+    m_players[7]->setPosition({midfieldX, yOffset + playerSpacingY});
 
     // Attaque (3 joueurs)
-    float attackX = midfieldX + (left ? 1 : -1) * playerSpacingX;
-    players[8]->setPosition({attackX, yOffset - playerSpacingY});
-    players[9]->setPosition({attackX, yOffset});
-    players[10]->setPosition({attackX, yOffset + playerSpacingY});
+    float attackX = midfieldX + (m_left ? 1 : -1) * playerSpacingX;
+    m_players[8]->setPosition({attackX, yOffset - playerSpacingY});
+    m_players[9]->setPosition({attackX, yOffset});
+    m_players[10]->setPosition({attackX, yOffset + playerSpacingY});
     
     /*
     TO REMOVE BEFORE THE END 
     */
 
-    if (left) {
-        players[0]->changeColor(gf::Color::Blue);
+    if (m_left) {
+        m_players[0]->changeColor(gf::Color::Blue);
 
-        players[1]->changeColor(gf::Color::Azure);
-        players[2]->changeColor(gf::Color::Azure);
-        players[3]->changeColor(gf::Color::Azure);
-        players[4]->changeColor(gf::Color::Azure);
+        m_players[1]->changeColor(gf::Color::Azure);
+        m_players[2]->changeColor(gf::Color::Azure);
+        m_players[3]->changeColor(gf::Color::Azure);
+        m_players[4]->changeColor(gf::Color::Azure);
 
-        players[5]->changeColor(gf::Color::Cyan);
-        players[6]->changeColor(gf::Color::Cyan);
-        players[7]->changeColor(gf::Color::Cyan);
+        m_players[5]->changeColor(gf::Color::Cyan);
+        m_players[6]->changeColor(gf::Color::Cyan);
+        m_players[7]->changeColor(gf::Color::Cyan);
 
-        players[8]->changeColor(gf::Color::Spring);
-        players[9]->changeColor(gf::Color::Spring);
-        players[10]->changeColor(gf::Color::Spring);
+        m_players[8]->changeColor(gf::Color::Spring);
+        m_players[9]->changeColor(gf::Color::Spring);
+        m_players[10]->changeColor(gf::Color::Spring);
     } else {
-        players[0]->changeColor(gf::Color::Red);
+        m_players[0]->changeColor(gf::Color::Red);
 
-        players[1]->changeColor(gf::Color::Orange);
-        players[2]->changeColor(gf::Color::Orange);
-        players[3]->changeColor(gf::Color::Orange);
-        players[4]->changeColor(gf::Color::Orange);
+        m_players[1]->changeColor(gf::Color::Orange);
+        m_players[2]->changeColor(gf::Color::Orange);
+        m_players[3]->changeColor(gf::Color::Orange);
+        m_players[4]->changeColor(gf::Color::Orange);
 
-        players[5]->changeColor(gf::Color::Rose);
-        players[6]->changeColor(gf::Color::Rose);
-        players[7]->changeColor(gf::Color::Rose);
+        m_players[5]->changeColor(gf::Color::Rose);
+        m_players[6]->changeColor(gf::Color::Rose);
+        m_players[7]->changeColor(gf::Color::Rose);
 
-        players[8]->changeColor(gf::Color::Yellow);
-        players[9]->changeColor(gf::Color::Yellow);
-        players[10]->changeColor(gf::Color::Yellow);
+        m_players[8]->changeColor(gf::Color::Yellow);
+        m_players[9]->changeColor(gf::Color::Yellow);
+        m_players[10]->changeColor(gf::Color::Yellow);
     }
 }
 
@@ -126,7 +139,7 @@ Player* Team::getClosestPlayerToBall(const Ball& ball) {
     Player* closestPlayer = nullptr;
     float minDistance = std::numeric_limits<float>::max();
 
-    for (Player* player : players) {
+    for (Player* player : m_players) {
         float distance = std::sqrt(std::pow(player->getPosition().x - ball.getPosition().x, 2) +
                                    std::pow(player->getPosition().y - ball.getPosition().y, 2));
 
@@ -141,16 +154,16 @@ Player* Team::getClosestPlayerToBall(const Ball& ball) {
 
 void Team::moveTeam(Ball& ball, const Player *mainPlayer) {
     Player *lastTouched = ball.getLockedTo();
-    bool isBallMemberOfTeam = count(players.begin(), players.end(), lastTouched) > 0;
-    for (Player *player : players) {
+    bool isBallMemberOfTeam = count(m_players.begin(), m_players.end(), lastTouched) > 0;
+    for (Player *player : m_players) {
         if (player != mainPlayer) {
-            player->AImove(ball, left, isBallMemberOfTeam, players);
+            player->AImove(ball, m_left, isBallMemberOfTeam, m_players);
         }
     }
 }
 
 void Team::update(float dt) {
-    for (Player *player : players) {
+    for (Player *player : m_players) {
         player->update(dt);
     }
 }
