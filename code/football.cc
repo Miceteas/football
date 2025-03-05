@@ -37,55 +37,118 @@
 #include "field.h"
 #include "minimap.h"
 
-void touch(bool isTop, bool forPlayerTeam) {
-  //Do something for a touch
+void touch(bool isTop, Team *teamHand, Team *teamRecieve, Ball *ball) {
+    //Do something for a touch
+    gf::Vector2f posBall;
+    gf::Vector2f posPlayer;
+    float angle = 0;
+    posBall = ball->getPosition();
+    posPlayer = ball->getPosition();
+
+    if (isTop) {
+        posBall.y = 10;
+        posPlayer.y = 0;
+        angle = -M_PI / 2.0f;
+    }else {
+        posBall.y = FIELDYSIZE - 10;
+        posPlayer.y = FIELDYSIZE;
+        angle = M_PI / 2.0f;
+    }
+
+    ball->moveTo(posBall);
+    Player *p = teamHand->getPlayers()[10];
+    p->moveTo(posPlayer);
+    p->setAngle(angle);
 }
 
-void corner(int side, bool forPlayerTeam) {
-  //Do something for a corner (0 = topleft, 1 = bottomright, 2 = topleft, 3 = bottomright)
+void corner(int side, Team *teamHand, Team *teamRecieve, Ball *ball) {
+    //Do something for a corner (0 = topleft, 1 = bottomright, 2 = topleft, 3 = bottomright)
+    gf::Vector2f posBall;
+    gf::Vector2f posPlayer;
+    float angle = 0;
+    switch (side) {
+        case 0 : 
+            posPlayer = {0, 0};
+            posBall = {10, 10};
+            angle = -M_PI / 4.0f;
+            break;
+        case 1 : 
+            posPlayer = {0, FIELDYSIZE};
+            posBall = {10, FIELDYSIZE - 10};
+            angle = M_PI / 4.0f;
+            break;
+        case 2 : 
+            posPlayer = {FIELDXSIZE, 0};
+            posBall = {FIELDXSIZE - 10, 0};
+            angle = -M_PI * 3.0f / 4.0f;
+            break;
+        case 3 :
+            posPlayer = {FIELDXSIZE, FIELDYSIZE};
+            posBall = {FIELDXSIZE - 10, FIELDYSIZE - 10};
+            angle = M_PI * 3.0f / 4.0f;
+            break;
+    }
+
+    ball->moveTo(posBall);
+    Player *p = teamHand->getPlayers()[10];
+    p->moveTo(posPlayer);
+    p->setAngle(angle);
+
 }
 
 /**
- * @param bool isPlayerTeam true if the goal was made against the team of the player (left)
+ * @param Team *team the team that scored the goal
  */
-void goal(bool isPlayerTeam) {
-  //Do something for a goal
+void goal(Team *teamGoal, Team *teamNoGoal, Ball *ball) { 
+    teamGoal->addGoal();
+    teamGoal->setupPlayers(0);
+    teamNoGoal->setupPlayers(1);
+    gf::Vector2f middlePos(FIELDXSIZE / 2.0f, FIELDYSIZE / 2.0f);
+    ball->moveTo(middlePos);
 }
 
-void checkOut(int isOut, std::vector<Player *> teamPlayersVec, Player *lastTouchedBy) {
+void checkOut(int isOut, std::vector<Player *> teamPlayersVec, Player *lastTouchedBy, Team *team1, Team *team2, Ball *ball) {
     bool isMemberOfTeam = count(teamPlayersVec.begin(), teamPlayersVec.end(), lastTouchedBy) > 0;
+    Team *teamHand = team2;
+    Team *teamRecieve = team1;
+    
+    if (isMemberOfTeam) {
+        teamHand = team1;
+        teamRecieve = team2;
+    }
+
     if (isOut != 0) {
         switch (isOut) {
             case 1 : 
-                corner(0, isMemberOfTeam);
+                corner(0, teamHand, teamRecieve, ball);
                 lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
             case 2 : 
-                goal(true);
+                goal(team2, team1, ball);
                 lastTouchedBy->changeColor(gf::Color::Red);
                 break;
             case 3 : 
-                corner(1, isMemberOfTeam);
+                corner(1, teamHand, teamRecieve, ball);
                 lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
             case 4 : 
-                touch(true, isMemberOfTeam);
+                touch(true, teamHand, teamRecieve, ball);
                 lastTouchedBy->changeColor(gf::Color::Violet);
                 break;
             case 5 : 
-                touch(false, isMemberOfTeam);
+                touch(false, teamHand, teamRecieve, ball);
                 lastTouchedBy->changeColor(gf::Color::Violet);
                 break;
             case 6 :
-                corner(2, isMemberOfTeam);
+                corner(2, teamHand, teamRecieve, ball);
                 lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
             case 7 : 
-                goal(false);
+                goal(team1, team2, ball);
                 lastTouchedBy->changeColor(gf::Color::Red);
                 break;
             case 8 :
-                corner(3, isMemberOfTeam);
+                corner(3, teamHand, teamRecieve, ball);
                 lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
         }
@@ -102,11 +165,11 @@ gf::Vector2f normalizeVelocity(gf::Vector2f velocity) {
 
 void endMatch(int playerGoals, int aiGoals) {
     if (playerGoals < aiGoals) {
-        //YOU LOSE
+        std::cout << "YOU LOST :(" << playerGoals << "-" << aiGoals << std::flush;
     } else if (playerGoals == aiGoals) {
-        //YOU TIE
+        std::cout << "TIE !" << playerGoals << "-" << aiGoals << std::flush;
     } else {
-        //YOU WIN CHAMPION !!!!
+        std::cout << "YOU WIN GOOD JOB !" << playerGoals << "-" << aiGoals << std::flush;
     }
 }
 
@@ -234,8 +297,8 @@ int main() {
     
     
     // default setup
-    team.setupPlayers();
-    team2.setupPlayers();
+    team.setupPlayers(1);
+    team2.setupPlayers(0);
 
     std::unordered_map<Player*, gf::Sprite> playerSprites;
     std::unordered_map<Player*, gf::Sprite> playerSprites2;
@@ -434,7 +497,7 @@ int main() {
 
         int out = ball.isOutOfField(TILESIZE);
 
-        checkOut(out, team.getPlayers(), ball.getLastTouchedBy());
+        checkOut(out, team.getPlayers(), ball.getLastTouchedBy(), &team, &team2, &ball);
 
         if (ball.isLockedTo(mainPlayer) || ball.getLastTouchedBy() == nullptr) {
             view.setCenter(mainPlayer->getPosition());

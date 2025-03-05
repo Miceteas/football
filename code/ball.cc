@@ -5,9 +5,9 @@ Ball::Ball(float size, gf::Vector2f position, gf::Color4f color)
 , m_size(size)
 , m_position(position)
 , m_color(color)
-, belongsTo(nullptr)
+, m_belongsTo(nullptr)
 , m_cooldown(0.0f)
-, lastTouchedBy(nullptr)
+, m_lastTouchedBy(nullptr)
 {
 }
 
@@ -30,10 +30,10 @@ void Ball::update(float dt) {
     static constexpr float friction = 150.0f;
     float speed = std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y);
 
-    if (belongsTo != nullptr) {
-        gf::Vector2f playerVelocity = belongsTo->getVelocity();
-        gf::Vector2f playerPosition = belongsTo->getPosition();
-        gf::Vector2f offset(cos(belongsTo->getAngle()) * belongsTo->getSize(), sin(belongsTo->getAngle()) * belongsTo->getSize());
+    if (m_belongsTo != nullptr) {
+        gf::Vector2f playerVelocity = m_belongsTo->getVelocity();
+        gf::Vector2f playerPosition = m_belongsTo->getPosition();
+        gf::Vector2f offset(cos(m_belongsTo->getAngle()) * m_belongsTo->getSize(), sin(m_belongsTo->getAngle()) * m_belongsTo->getSize());
 
         m_position = playerPosition + offset;
         m_velocity = playerVelocity;
@@ -41,7 +41,7 @@ void Ball::update(float dt) {
     }
 
     if (speed > 0.001f) {
-        float deceleration = belongsTo == nullptr ? (friction * dt) : 0;
+        float deceleration = m_belongsTo == nullptr ? (friction * dt) : 0;
         speed = std::max(speed - deceleration, 0.0f);
 
         if (speed > 0.0f) {
@@ -58,19 +58,19 @@ void Ball::update(float dt) {
 
 void Ball::lockTo(Player *p) {
     if (m_cooldown <= 0) {
-        belongsTo = p;
-        lastTouchedBy = p;
+        m_belongsTo = p;
+        m_lastTouchedBy = p;
         m_cooldown = BASECOOLDOWN;
     } 
 }
 
 void Ball::unlock() {
-    belongsTo = nullptr;
+    m_belongsTo = nullptr;
     m_cooldown = BASECOOLDOWN;
 }
 
 bool Ball::isLockedTo(Player *p) const {
-    return belongsTo == p;
+    return m_belongsTo == p;
 }
 
 gf::Vector2f Ball::getVelocity() const {
@@ -88,11 +88,11 @@ void Ball::render(gf::RenderTarget& target) {
 }
 
 Player *Ball::getLastTouchedBy() {
-    return lastTouchedBy;
+    return m_lastTouchedBy;
 }
 
 Player *Ball::getLockedTo() {
-    return belongsTo;
+    return m_belongsTo;
 }
 
 int Ball::isOutOfField(int tileSize) {
@@ -138,4 +138,9 @@ bool Ball::isTouchingPlayer(const Player& player) const {
     float distance = std::sqrt(std::pow(m_position.x - player.getPosition().x, 2) +
                                std::pow(m_position.y - player.getPosition().y, 2));
     return distance < (m_size + player.getSize()) / 2.0f;
+}
+
+void Ball::moveTo(gf::Vector2f position) {
+    m_position = position;
+    m_velocity = gf::Vector2f(0.0f, 0.0f);
 }

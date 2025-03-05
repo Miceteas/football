@@ -39,7 +39,7 @@ class Team {
         std::vector<Player*> getPlayers();
 
         void initPlayers();
-        void setupPlayers();
+        void setupPlayers(int style);
         Player* getClosestPlayerToBall(const Ball& ball);
         void moveTeam(Ball& ball, const Player *mainPlayer);
         void update(float dt);

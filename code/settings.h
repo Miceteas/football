@@ -19,7 +19,7 @@
 #define FIELD_X_TILES 25
 #define FIELD_Y_TILES 13
 #define TILESIZE 128.0f
-#define BASECOOLDOWN 0.2f
+#define BASECOOLDOWN 0.4f
 #define BASETIMEOFMINUTE 4.0f
 
 #endif //SETTINGS_H

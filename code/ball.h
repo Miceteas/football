@@ -18,8 +18,8 @@ class Ball : public gf::Entity {
     float m_size;
     gf::Vector2f m_position;
     gf::Color4f m_color;
-    Player *belongsTo;
-    Player *lastTouchedBy;
+    Player *m_belongsTo;
+    Player *m_lastTouchedBy;
     bool m_isLocked; 
     float m_cooldown;
 
@@ -40,6 +40,7 @@ class Ball : public gf::Entity {
     Player *getLastTouchedBy();
     Player *getLockedTo();
 
+    void moveTo(gf::Vector2f position);
     bool isTouchingPlayer(const Player& player) const;
 };
 

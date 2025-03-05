@@ -22,6 +22,10 @@ int Team::getGoals() {
     return m_goals;
 }
 
+void Team::addGoal() {
+    ++m_goals;
+}
+
 void Team::changeSetup(int setup) {
     m_setup = setup;
 }
@@ -68,14 +72,17 @@ void Team::initPlayers() {
     m_players.push_back(new Player(80.0f, PLAYERSIZE, gf::Vector2f(100.0f, 40.0f), Role::ATTACKER, Side::BOTTOM, m_color, 0));
 }
 
-void Team::setupPlayers() {
+void Team::setupPlayers(int style) {
     float xOffset = m_left ? 0.1f * FIELDXSIZE : FIELDXSIZE - 0.1f * FIELDXSIZE;
     float yOffset = FIELDYSIZE / 2.0f;
     float playerSpacingY = FIELDYSIZE / 5.0f;
     float playerSpacingX = FIELDXSIZE / 10.0f;
 
+    for (Player *p : m_players) {
+        p->setVelocity({0.0f, 0.0f});
+    }
+    
     // Goalkeeper
-    m_players[0]->setVelocity({0.0f, 0.0f});
     m_players[0]->setPosition({xOffset, yOffset});
 
     // Défense (4 joueurs)
@@ -91,11 +98,21 @@ void Team::setupPlayers() {
     m_players[6]->setPosition({midfieldX, yOffset});
     m_players[7]->setPosition({midfieldX, yOffset + playerSpacingY});
 
-    // Attaque (3 joueurs)
-    float attackX = midfieldX + (m_left ? 1 : -1) * playerSpacingX;
+    float attackX = 0;
+
+    if (style == 1) {
+        // Attaque (3 joueurs) position avancée,
+        attackX = midfieldX + (m_left ? 2.0f : -2.0f) * playerSpacingX;
+        playerSpacingY /= 2;
+    }else {
+        // Attaque (3 joueurs) position normale,
+        attackX = midfieldX + (m_left ? 1 : -1) * playerSpacingX;
+    }
+        
     m_players[8]->setPosition({attackX, yOffset - playerSpacingY});
     m_players[9]->setPosition({attackX, yOffset});
     m_players[10]->setPosition({attackX, yOffset + playerSpacingY});
+
     
     /*
     TO REMOVE BEFORE THE END 
@@ -133,7 +150,6 @@ void Team::setupPlayers() {
         m_players[10]->changeColor(gf::Color::Yellow);
     }
 }
-
 
 Player* Team::getClosestPlayerToBall(const Ball& ball) {
     Player* closestPlayer = nullptr;

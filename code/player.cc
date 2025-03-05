@@ -33,6 +33,10 @@ gf::Vector2f Player::getVelocity() const {
     return m_velocity;
 }
 
+void Player::setAngle(float angle) {
+    m_angle = angle;
+}
+
 void Player::setAim(std::vector<Player *> teamPlayersVec, bool left) {
 
     gf::Vector2f targetPosition;
@@ -400,6 +404,11 @@ void Player::AImove(Ball& ball, bool left, bool ballInTeam, std::vector<Player *
 
     setVelocity(direction * SPEED);
 
+}
+
+void Player::moveTo(gf::Vector2f position) {
+    m_position = position;
+    m_velocity = {0.0f, 0.0f};
 }
 
 //TEMPORARY 
