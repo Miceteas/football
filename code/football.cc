@@ -37,6 +37,15 @@
 #include "field.h"
 #include "minimap.h"
 
+enum class GameState {
+    START,
+    PLAYING,
+    WAITING,
+    END
+};
+
+GameState currState = GameState::START;
+
 void touch(bool isTop, Team *teamHand, Team *teamRecieve, Ball *ball) {
     //Do something for a touch
     gf::Vector2f posBall;
@@ -56,7 +65,7 @@ void touch(bool isTop, Team *teamHand, Team *teamRecieve, Ball *ball) {
     }
 
     ball->moveTo(posBall);
-    Player *p = teamHand->getPlayers()[10];
+    Player *p = teamRecieve->getPlayers()[10];
     p->moveTo(posPlayer);
     p->setAngle(angle);
 }
@@ -90,7 +99,7 @@ void corner(int side, Team *teamHand, Team *teamRecieve, Ball *ball) {
     }
 
     ball->moveTo(posBall);
-    Player *p = teamHand->getPlayers()[10];
+    Player *p = teamRecieve->getPlayers()[10];
     p->moveTo(posPlayer);
     p->setAngle(angle);
 
@@ -121,35 +130,27 @@ void checkOut(int isOut, std::vector<Player *> teamPlayersVec, Player *lastTouch
         switch (isOut) {
             case 1 : 
                 corner(0, teamHand, teamRecieve, ball);
-                lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
             case 2 : 
                 goal(team2, team1, ball);
-                lastTouchedBy->changeColor(gf::Color::Red);
                 break;
             case 3 : 
                 corner(1, teamHand, teamRecieve, ball);
-                lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
             case 4 : 
                 touch(true, teamHand, teamRecieve, ball);
-                lastTouchedBy->changeColor(gf::Color::Violet);
                 break;
             case 5 : 
                 touch(false, teamHand, teamRecieve, ball);
-                lastTouchedBy->changeColor(gf::Color::Violet);
                 break;
             case 6 :
                 corner(2, teamHand, teamRecieve, ball);
-                lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
             case 7 : 
                 goal(team1, team2, ball);
-                lastTouchedBy->changeColor(gf::Color::Red);
                 break;
             case 8 :
                 corner(3, teamHand, teamRecieve, ball);
-                lastTouchedBy->changeColor(gf::Color::Spring);
                 break;
         }
     }
@@ -191,8 +192,6 @@ int main() {
     window.setFramerateLimit(60);
 
     gf::RenderWindow renderer(window);
-
-    gf::Vector2u windowSize = window.getSize();
 
     // add cameras
     gf::ViewContainer views;
@@ -294,8 +293,6 @@ int main() {
     gf::Texture playerTexture("../assets/PNG/Blue/characterBlue (1).png");
     playerTextures.push_back(std::move(playerTexture));
 
-    
-    
     // default setup
     team.setupPlayers(1);
     team2.setupPlayers(0);
@@ -335,8 +332,6 @@ int main() {
 
     float currSeconds = 0;
     float currMinutes = 0;
-
-    //
     
     // main loop
     
@@ -451,12 +446,15 @@ int main() {
             }
         }
 
+        if (ball.getLockedTo()) {
+            ball.getLockedTo()->reduceSpeed();
+        }
         if (ball.isLockedTo(mainPlayer)) {
-            mainPlayer->reduceSpeed();
             if (sprintAction.isActive()) {
                 ball.unlock();
                 ball.setVelocity(mainPlayer->getSelfPassVelocity());
             }
+
             if (passAction.isActive()) {
                 ball.unlock();
                 ball.setVelocity(mainPlayer->getPassVelocity(team.getPlayers()));
@@ -513,16 +511,13 @@ int main() {
             sprite.setRotation(player->getAngle());
         }
 
-        gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
-        gf::Vector2f ballPosition = ball.getPosition();
-
         if (ball.isLockedTo(mainPlayer)) {
             ball.setVelocity(velocity);
         } else {
             ball.setVelocity(ball.getVelocity());
         }
 
-        // team.moveTeam(ball, mainPlayer);
+        team.moveTeam(ball, mainPlayer);
         team2.moveTeam(ball, mainPlayer);
 
         ball.update(dt.asSeconds());
@@ -549,11 +544,13 @@ int main() {
 
             if (currMinutes >= 90) {
                 endMatch(team.getGoals(), team2.getGoals());
+                
+                currMinutes = 0;
             }
         }
 
-        //Minimap minimap(field, 0.2f); // 0.2f is the scale for the minimap
-        //minimap.setPosition(10.0f, 10.0f); // Position in the top-left corner
+        // Minimap minimap(field, 0.2f); // 0.2f is the scale for the minimap
+        // minimap.setPosition(10.0f, 10.0f); // Position in the top-left corner
         
         // Main loop (rendering section)
         renderer.clear();
@@ -578,7 +575,7 @@ int main() {
 
 
         // Render the minimap
-        //minimap.render(renderer);
+        // minimap.render(renderer);
 
         // Return to the main game view
         renderer.setView(view);
