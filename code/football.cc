@@ -405,13 +405,13 @@ int main() {
     gf::Sprite backgroundSprite(backgroundTexture);
     gf::Vector2f textureSize = backgroundTexture.getSize();
     
-    float scaleX = windowSize.x / textureSize.x;
-    float scaleY = windowSize.y / textureSize.y;
+    float scaleX = ScreenSize.x / textureSize.x;
+    float scaleY = ScreenSize.y / textureSize.y;
     float scale = std::max(scaleX, scaleY);
     backgroundSprite.setScale({ scale, scale });
     
-    backgroundSprite.setPosition({ (windowSize.x - textureSize.x * scale) / 2,
-        (windowSize.y - textureSize.y * scale) / 2 });
+    backgroundSprite.setPosition({ (ScreenSize.x - textureSize.x * scale) / 2,
+        (ScreenSize.y - textureSize.y * scale) / 2 });
     
 
     while (window.isOpen()) {
