@@ -5,6 +5,9 @@ project(FOOTBALL
   LANGUAGES CXX
 )
 
+# Ajouter les flags de warning
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic")
+
 # Configurer le fichier config.h
 set(FOOTBALL_DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/code/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)

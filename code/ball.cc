@@ -6,8 +6,8 @@ Ball::Ball(float size, gf::Vector2f position, gf::Color4f color)
 , m_position(position)
 , m_color(color)
 , m_belongsTo(nullptr)
-, m_cooldown(0.0f)
 , m_lastTouchedBy(nullptr)
+, m_cooldown(0.0f)
 {
 }
 

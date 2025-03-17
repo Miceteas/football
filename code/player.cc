@@ -55,6 +55,9 @@ void Player::setAim(std::vector<Player *> teamPlayersVec, bool left) {
             case Role::MIDFIELDER : 
                 aimedRole = Role::ATTACKER;
                 break;
+            case Role::ATTACKER :
+                aimedRole = Role::ATTACKER;
+                break;
         }
     
         for (const auto& other : teamPlayersVec) {
@@ -309,8 +312,8 @@ void Player::AImove(Ball& ball, bool left, bool ballInTeam, std::vector<Player *
     float middleEnd = XrightQuarter;
     float enemyXStart = left ? Xmiddle : XleftFull;
     float enemyXEnd = left ? XrightFull : Xmiddle;
-    float goalkeeperXStart = left ? XleftFull : XrightQuarter;
-    float goalkeeperXEnd = left ? XleftQuarter : XrightFull;
+    float goalkeeperXStart = left ? XleftFull : FIELDXSIZE * 9 / 10;
+    float goalkeeperXEnd = left ? FIELDXSIZE / 10 : XrightFull;
     float enemyGoalX = left ? XrightFull : XleftFull;
 
     gf::Vector2f targetPosition;

@@ -2,11 +2,11 @@
 
 FootballField::FootballField(const std::string& texturePath, const std::vector<int>& tileOrder, int tilesX, int tilesY, int displayTileSize)
 : m_texture(texturePath)
+, m_tileLayer(gf::TileLayer::createOrthogonal({ tilesX, tilesY }, { 64, 64 })) 
 , m_tilesX(tilesX)
 , m_tilesY(tilesY)
 , m_displayTileSize(displayTileSize)
 , m_spriteTileSize(64) // Spritesheet tiles are always 64x64 pixels for us but if needed it can be added as a parameter!!! 
-, m_tileLayer(gf::TileLayer::createOrthogonal({ tilesX, tilesY }, { m_spriteTileSize, m_spriteTileSize })) 
 {
     std::size_t tilesetId = m_tileLayer.createTilesetId();
     gf::Tileset& tileset = m_tileLayer.getTileset(tilesetId);
