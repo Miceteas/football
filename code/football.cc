@@ -27,6 +27,8 @@
 #include <cmath>
 #include <unordered_map>
 #include <gf/TileLayer.h>
+#include <gf/Text.h>
+#include <gf/Font.h>
 
 #include "config.h"
 #include "settings.h"
@@ -173,6 +175,13 @@ void endMatch(int playerGoals, int aiGoals) {
     }
 }
 
+bool isInside(const gf::RoundedRectangleShape& button, const gf::Vector2f& mousePos) {
+    gf::Vector2f pos = button.getPosition();
+    gf::Vector2f size = button.getSize();
+    return (mousePos.x >= pos.x && mousePos.x <= pos.x + size.x &&
+            mousePos.y >= pos.y && mousePos.y <= pos.y + size.y);
+}
+
 int main() {
     static constexpr gf::Vector2u ScreenSize(800, 800);
 
@@ -262,6 +271,10 @@ int main() {
     sprintAction.addScancodeKeyControl(gf::Scancode::B); 
     sprintAction.setContinuous();
     actions.addAction(sprintAction);
+
+    gf::Action menu("menu");
+    menu.addScancodeKeyControl(gf::Scancode::P); 
+    actions.addAction(menu);
 
     // add entities
     gf::EntityContainer mainEntities;
@@ -371,220 +384,293 @@ int main() {
     
     FootballField field("../assets/Tilesheet/groundGrass.png", tileOrder, FIELD_X_TILES, FIELD_Y_TILES, TILESIZE);
 
-    while (window.isOpen()) {
-    
-        // inputs
-        gf::Event event;
+    bool isInMenu = true;
 
+    gf::RoundedRectangleShape playButton({ 200.0f, 50.0f }, 10.0f); // Coins arrondis de 10px
+    playButton.setPosition({ 300.0f, 325.0f });
+    playButton.setColor(gf::Color::White);
+    playButton.setOutlineThickness(3.0f); // Contour noir pour améliorer la visibilité
+    playButton.setOutlineColor(gf::Color::Black);
+    
+    gf::RoundedRectangleShape quitButton({ 200.0f, 50.0f }, 10.0f);
+    quitButton.setPosition({ 300.0f, 440.0f });
+    quitButton.setColor(gf::Color::White);
+    quitButton.setOutlineThickness(3.0f);
+    quitButton.setOutlineColor(gf::Color::Black);
+    
+    gf::Font font("../data/ClearSans-Bold.ttf");
+    
+    gf::Text playText("Play", font, 50);
+    playText.setPosition({ 340.0f, 365.0f });
+    
+    gf::Text quitText("Quit", font, 50);
+    quitText.setPosition({ 340.0f, 480.0f });
+    
+    gf::Texture backgroundTexture("../assets/startmenu.png");
+    gf::Sprite backgroundSprite(backgroundTexture);
+    gf::Vector2f textureSize = backgroundTexture.getSize();
+    
+    float scaleX = windowSize.x / textureSize.x;
+    float scaleY = windowSize.y / textureSize.y;
+    float scale = std::max(scaleX, scaleY);
+    backgroundSprite.setScale({ scale, scale });
+    
+    backgroundSprite.setPosition({ (windowSize.x - textureSize.x * scale) / 2,
+        (windowSize.y - textureSize.y * scale) / 2 });
+    
+
+    while (window.isOpen()) {
+        gf::Event event;
         while (window.pollEvent(event)) {
             actions.processEvent(event);
             views.processEvent(event);
-        }
-
-        if (closeWindowAction.isActive()) {
-            window.close();
-        }
-
-        if (fullscreenAction.isActive()) {
-            fullscreen = !fullscreen;
-            window.setFullscreen(fullscreen);
-        }
-
-        velocity = {0.0f, 0.0f};
-        if (leftAction.isActive()) {
-            velocity.x += -SPEED;
-        }
-        if (rightAction.isActive()) {
-            velocity.x += SPEED;
-        }
-
-        if (upAction.isActive()) {
-            velocity.y += -SPEED;
-        }
-        if (downAction.isActive()) {
-            velocity.y += SPEED;
-        }
-        velocity = normalizeVelocity(velocity);
-
-        // update
-
-        if (dropAction.isActive() && ball.isLockedTo(mainPlayer)) {
-            ball.unlock();
-        }
-
-        for (Player* player : team.getPlayers()) {
-            if (ball.isTouchingPlayer(*player)) {
-                ball.lockTo(player);
+    
+            if (closeWindowAction.isActive()) {
+                window.close();
             }
-
-            if (ball.isLockedTo(player)) {
-                mainPlayer = player;
+    
+            if (fullscreenAction.isActive()) {
+                fullscreen = !fullscreen;
+                window.setFullscreen(fullscreen);
             }
-
-            for (Player* other : team.getPlayers()) {
-                if (player != other) {
-                    player->handleCollision(*other);
+    
+            if (event.type == gf::EventType::MouseButtonPressed) {
+                gf::Vector2f mousePos = {static_cast<float>(event.mouseButton.coords.x),
+                                         static_cast<float>(event.mouseButton.coords.y)};
+    
+                if (isInside(playButton, mousePos)) {
+                    isInMenu = false;
+                }
+    
+                if (isInside(quitButton, mousePos) && isInMenu == true) {
+                    window.close();
                 }
             }
-
-            for (Player* other : team2.getPlayers()) {
-                if (player != other) {
-                    player->handleCollision(*other);
+    
+            if (event.type == gf::EventType::MouseMoved) {
+                gf::Vector2f mousePos = {static_cast<float>(event.mouseCursor.coords.x),
+                                         static_cast<float>(event.mouseCursor.coords.y)};
+                
+                if (isInside(playButton, mousePos)) {
+                    playButton.setColor(gf::v1::Color4f(0.5f, 0.5f, 0.5f, 1.0f)); 
+                } else {
+                    playButton.setColor(gf::v1::Color4f(1.0f, 1.0f, 1.0f, 1.0f)); 
                 }
-            }
+            
+                if (isInside(quitButton, mousePos)) {
+                    quitButton.setColor(gf::v1::Color4f(0.5f, 0.5f, 0.5f, 1.0f)); 
+                } else {
+                    quitButton.setColor(gf::v1::Color4f(1.0f, 1.0f, 1.0f, 1.0f)); 
+                }
+            }            
         }
-        for (Player* player : team2.getPlayers()) {
-            if (ball.isTouchingPlayer(*player)) {
-                ball.lockTo(player);
+    
+        if (isInMenu) {
+            renderer.clear();
+            renderer.draw(backgroundSprite); 
+            renderer.draw(playButton);
+            renderer.draw(quitButton);
+            renderer.draw(playText);
+            renderer.draw(quitText);
+            renderer.display();
+            continue;
+        } else {
+            velocity = {0.0f, 0.0f};
+            if (leftAction.isActive()) {
+                velocity.x += -SPEED;
             }
-
-            for (Player* other : team.getPlayers()) {
-                if (player != other) {
-                    player->handleCollision(*other);
-                }
+            if (rightAction.isActive()) {
+                velocity.x += SPEED;
             }
-
-            for (Player* other : team2.getPlayers()) {
-                if (player != other) {
-                    player->handleCollision(*other);
-                }
+    
+            if (upAction.isActive()) {
+                velocity.y += -SPEED;
             }
-        }
+            if (downAction.isActive()) {
+                velocity.y += SPEED;
+            }
+            velocity = normalizeVelocity(velocity);
 
-        if (ball.isLockedTo(mainPlayer)) {
-            mainPlayer->reduceSpeed();
-            if (sprintAction.isActive()) {
+            // update
+
+            if (dropAction.isActive() && ball.isLockedTo(mainPlayer)) {
                 ball.unlock();
-                ball.setVelocity(mainPlayer->getSelfPassVelocity());
-            }
-            if (passAction.isActive()) {
-                ball.unlock();
-                ball.setVelocity(mainPlayer->getPassVelocity(team.getPlayers()));
             }
 
-            if (shootAction.isActive()) {
-                ball.unlock();
-                ball.setVelocity(mainPlayer->getShootVelocity(ball.getSize(), team.getPlayers()));
-            }
-        }
-
-        if (tackleAction.isActive() && !mainPlayer->isTackling() &&  !ball.isLockedTo(mainPlayer)) {
-            mainPlayer->setTackleData(400.0f, mainPlayer->getAngle()); 
-        }
-
-        if (mainPlayer->isTackling()) {
             for (Player* player : team.getPlayers()) {
-                if (player != mainPlayer && mainPlayer->collidesWith(*player)) {
-                    player->freeze(1.0f);
+                if (ball.isTouchingPlayer(*player)) {
+                    ball.lockTo(player);
+                }
+
+                if (ball.isLockedTo(player)) {
+                    mainPlayer = player;
+                }
+
+                for (Player* other : team.getPlayers()) {
+                    if (player != other) {
+                        player->handleCollision(*other);
+                    }
+                }
+
+                for (Player* other : team2.getPlayers()) {
+                    if (player != other) {
+                        player->handleCollision(*other);
+                    }
                 }
             }
             for (Player* player : team2.getPlayers()) {
-                if (player != mainPlayer && mainPlayer->collidesWith(*player)) {
-                    player->freeze(1.0f);
+                if (ball.isTouchingPlayer(*player)) {
+                    ball.lockTo(player);
+                }
+
+                for (Player* other : team.getPlayers()) {
+                    if (player != other) {
+                        player->handleCollision(*other);
+                    }
+                }
+
+                for (Player* other : team2.getPlayers()) {
+                    if (player != other) {
+                        player->handleCollision(*other);
+                    }
                 }
             }
-        }
 
-        if (sprintAction.isActive()) {
-            mainPlayer->startSprint();
-        } else {
-            mainPlayer->stopSprint();
-        }
+            if (ball.isLockedTo(mainPlayer)) {
+                mainPlayer->reduceSpeed();
+                if (sprintAction.isActive()) {
+                    ball.unlock();
+                    ball.setVelocity(mainPlayer->getSelfPassVelocity());
+                }
+                if (passAction.isActive()) {
+                    ball.unlock();
+                    ball.setVelocity(mainPlayer->getPassVelocity(team.getPlayers()));
+                }
 
-        if (switchAction.isActive() && !mainPlayer->isTackling() && !ball.isLockedTo(mainPlayer)) {
-            Player* closestPlayer = team.getClosestPlayerToBall(ball);
-            if (closestPlayer) {
-                mainPlayer = closestPlayer;
-            }
-        }
-
-        actions.reset();
-
-        gf::Time dt = clock.restart();
-        mainPlayer->setVelocity(velocity);
-
-        for (auto& [player, sprite] : playerSprites) {
-            sprite.setPosition(player->getPosition());
-            sprite.setRotation(player->getAngle());
-        }
-
-        for (auto& [player, sprite] : playerSprites2) {
-            sprite.setPosition(player->getPosition());
-            sprite.setRotation(player->getAngle());
-        }
-
-        gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
-        gf::Vector2f ballPosition = ball.getPosition();
-
-        if (ball.isLockedTo(mainPlayer)) {
-            ball.setVelocity(velocity);
-        } else {
-            ball.setVelocity(ball.getVelocity());
-        }
-
-        // team.moveTeam(ball, mainPlayer);
-        team2.moveTeam(ball, mainPlayer);
-
-        ball.update(dt.asSeconds());
-        team.update(dt.asSeconds());
-        team2.update(dt.asSeconds());
-
-        int out = ball.isOutOfField(TILESIZE);
-
-        checkOut(out, team.getPlayers(), ball.getLastTouchedBy(), &team, &team2, &ball);
-
-        if (ball.isLockedTo(mainPlayer) || ball.getLastTouchedBy() == nullptr) {
-            view.setCenter(mainPlayer->getPosition());
-        }else {
-            view.setCenter(ball.getPosition());
-        }
-
-        if (!out) {
-            currSeconds += dt.asSeconds();
-    
-            if (currSeconds >= BASETIMEOFMINUTE) {
-                ++currMinutes;
-                currSeconds = 0;
+                if (shootAction.isActive()) {
+                    ball.unlock();
+                    ball.setVelocity(mainPlayer->getShootVelocity(ball.getSize(), team.getPlayers()));
+                }
             }
 
-            if (currMinutes >= 90) {
-                endMatch(team.getGoals(), team2.getGoals());
+            if (tackleAction.isActive() && !mainPlayer->isTackling() &&  !ball.isLockedTo(mainPlayer)) {
+                mainPlayer->setTackleData(400.0f, mainPlayer->getAngle()); 
             }
-        }
 
-        //Minimap minimap(field, 0.2f); // 0.2f is the scale for the minimap
-        //minimap.setPosition(10.0f, 10.0f); // Position in the top-left corner
+            if (mainPlayer->isTackling()) {
+                for (Player* player : team.getPlayers()) {
+                    if (player != mainPlayer && mainPlayer->collidesWith(*player)) {
+                        player->freeze(1.0f);
+                    }
+                }
+                for (Player* player : team2.getPlayers()) {
+                    if (player != mainPlayer && mainPlayer->collidesWith(*player)) {
+                        player->freeze(1.0f);
+                    }
+                }
+            }
+
+            if (sprintAction.isActive()) {
+                mainPlayer->startSprint();
+            } else {
+                mainPlayer->stopSprint();
+            }
+
+            if (switchAction.isActive() && !mainPlayer->isTackling() && !ball.isLockedTo(mainPlayer)) {
+                Player* closestPlayer = team.getClosestPlayerToBall(ball);
+                if (closestPlayer) {
+                    mainPlayer = closestPlayer;
+                }
+            }
+
+            actions.reset();
+
+            gf::Time dt = clock.restart();
+            mainPlayer->setVelocity(velocity);
+
+            for (auto& [player, sprite] : playerSprites) {
+                sprite.setPosition(player->getPosition());
+                sprite.setRotation(player->getAngle());
+            }
+
+            for (auto& [player, sprite] : playerSprites2) {
+                sprite.setPosition(player->getPosition());
+                sprite.setRotation(player->getAngle());
+            }
+
+            gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
+            gf::Vector2f ballPosition = ball.getPosition();
+
+            if (ball.isLockedTo(mainPlayer)) {
+                ball.setVelocity(velocity);
+            } else {
+                ball.setVelocity(ball.getVelocity());
+            }
+
+            // team.moveTeam(ball, mainPlayer);
+            team2.moveTeam(ball, mainPlayer);
+
+            ball.update(dt.asSeconds());
+            team.update(dt.asSeconds());
+            team2.update(dt.asSeconds());
+
+            int out = ball.isOutOfField(TILESIZE);
+
+            checkOut(out, team.getPlayers(), ball.getLastTouchedBy(), &team, &team2, &ball);
+
+            if (ball.isLockedTo(mainPlayer) || ball.getLastTouchedBy() == nullptr) {
+                view.setCenter(mainPlayer->getPosition());
+            }else {
+                view.setCenter(ball.getPosition());
+            }
+
+            if (!out) {
+                currSeconds += dt.asSeconds();
         
-        // Main loop (rendering section)
-        renderer.clear();
+                if (currSeconds >= BASETIMEOFMINUTE) {
+                    ++currMinutes;
+                    currSeconds = 0;
+                }
 
-        // Set the main view for the field and game entities
-        renderer.setView(view);
+                if (currMinutes >= 90) {
+                    endMatch(team.getGoals(), team2.getGoals());
+                }
+            }
 
-        // Render the field
-        renderer.draw(field.getTileLayer(), gf::RenderStates());
+            //Minimap minimap(field, 0.2f); // 0.2f is the scale for the minimap
+            //minimap.setPosition(10.0f, 10.0f); // Position in the top-left corner
+            
+            // Main loop (rendering section)
+            renderer.clear();
 
-        // Render the players
-        for (auto& [player, sprite] : playerSprites) {
-            player->render(renderer, player == mainPlayer);
+            // Set the main view for the field and game entities
+            renderer.setView(view);
+
+            // Render the field
+            renderer.draw(field.getTileLayer(), gf::RenderStates());
+
+            // Render the players
+            for (auto& [player, sprite] : playerSprites) {
+                player->render(renderer, player == mainPlayer);
+            }
+
+            for (auto& [player, sprite] : playerSprites2) {
+                player->render(renderer, false);
+            }
+
+            // Render the ball
+            ball.render(renderer);
+
+
+            // Render the minimap
+            //minimap.render(renderer);
+
+            // Return to the main game view
+            renderer.setView(view);
+
+            // Display everything
+            renderer.display();
         }
-
-        for (auto& [player, sprite] : playerSprites2) {
-            player->render(renderer, false);
-        }
-
-        // Render the ball
-        ball.render(renderer);
-
-
-        // Render the minimap
-        //minimap.render(renderer);
-
-        // Return to the main game view
-        renderer.setView(view);
-
-        // Display everything
-        renderer.display();
     }
 
     return 0;
