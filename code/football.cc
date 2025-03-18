@@ -314,7 +314,7 @@ int main() {
     Player* mainPlayer = team.getPlayers()[10]; 
 
     float currSeconds = 0;
-    float currMinutes = 0;
+    int currMinutes = 0;
     
     
     std::vector<int> tileOrder = {
@@ -354,6 +354,15 @@ int main() {
     
     gf::Text quitText("Quit", font, 50);
     quitText.setPosition({ 340.0f, 480.0f });
+
+    gf::Text scoreText("0 - 0", font, 50);
+    scoreText.setAnchor(gf::Anchor::TopCenter);
+    scoreText.setColor(gf::Color::White);
+
+    gf::Text timeText("00:00", font, 50);
+    timeText.setAnchor(gf::Anchor::BottomCenter);
+    timeText.setColor(gf::Color::White);
+
     
     gf::Texture backgroundTexture("../assets/startmenu.png");
     gf::Sprite backgroundSprite(backgroundTexture);
@@ -598,6 +607,12 @@ int main() {
                     endMatch(team.getGoals(), team2.getGoals());
                 }
             }
+
+            scoreText.setString(std::to_string(team.getGoals()) + " - " + std::to_string(team2.getGoals()));
+            scoreText.setPosition({view.getCenter().x, view.getCenter().y - 400.0f});
+
+            timeText.setString(std::to_string(currMinutes) + ":" + std::to_string(int(currSeconds * 60 / BASETIMEOFMINUTE)));
+            timeText.setPosition({view.getCenter().x, view.getCenter().y + 400.0f});
             
             // Main loop (rendering section)
             renderer.clear();
@@ -616,6 +631,9 @@ int main() {
             }
 
             renderer.draw(ballSprite);
+
+            renderer.draw(scoreText);
+            renderer.draw(timeText);
 
             renderer.display();
         }else {
