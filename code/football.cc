@@ -160,11 +160,11 @@ gf::Vector2f normalizeVelocity(gf::Vector2f velocity) {
 
 void endMatch(int playerGoals, int aiGoals) {
     if (playerGoals < aiGoals) {
-        std::cout << "YOU LOST :(" << playerGoals << "-" << aiGoals << std::flush;
+        std::cout << "YOU LOST :( " << playerGoals << " - " << aiGoals << std::flush;
     } else if (playerGoals == aiGoals) {
-        std::cout << "TIE !" << playerGoals << "-" << aiGoals << std::flush;
+        std::cout << "TIE ! " << playerGoals << " - " << aiGoals << std::flush;
     } else {
-        std::cout << "YOU WIN GOOD JOB !" << playerGoals << "-" << aiGoals << std::flush;
+        std::cout << "YOU WIN GOOD JOB ! " << playerGoals << " - " << aiGoals << std::flush;
     }
     currState = GameState::END;
 }
@@ -181,7 +181,6 @@ int main() {
 
     gf::Log::setLevel(gf::Log::Info);
 
-    // initialize window
     gf::Window window("gf football", ScreenSize, ~gf::WindowHints::Resizable);
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
@@ -190,7 +189,6 @@ int main() {
 
     gf::ExtendView view({0.0f, 20.0f}, {float(window.getSize().x), float(window.getSize().y)});
 
-    // add actions
     gf::ActionContainer actions;
 
     gf::Action closeWindowAction("Close window");
@@ -253,12 +251,11 @@ int main() {
     sprintAction.setContinuous();
     actions.addAction(sprintAction);
 
-    gf::Action menu("menu");
-    menu.addScancodeKeyControl(gf::Scancode::P); 
-    actions.addAction(menu);
+    gf::Action pauseAction("Pause");
+    pauseAction.addScancodeKeyControl(gf::Scancode::P); 
+    actions.addAction(pauseAction);
 
     gf::Clock clock;
-    bool fullscreen = false;
 
     float x = (13 % FIELD_X_TILES) * TILESIZE - TILESIZE/2; 
     float y = (FIELD_Y_TILES*TILESIZE)/2;
@@ -270,6 +267,8 @@ int main() {
     Team team2("Team B", gf::Color::Chartreuse);
     team2.initPlayers();
     team2.setupSide(false);
+
+    gf::Time dt;
 
     std::vector<gf::Texture> teamTextures;
     std::vector<gf::Texture> enemyTextures;
@@ -317,10 +316,9 @@ int main() {
     float currSeconds = 0;
     float currMinutes = 0;
     
-    // main loop
     
     std::vector<int> tileOrder = {
-         5,  2,  2,  2,   2,  2,  2,  2,  2,  2,  2,  2,  3,  2,  2,  2,  2,  2,  2,  2,   2,  2,  2,  2,  6,
+        5,  2,  2,  2,   2,  2,  2,  2,  2,  2,  2,  2,  3,  2,  2,  2,  2,  2,  2,  2,   2,  2,  2,  2,  6,
         14,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0, 17,
         14,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0, 17,
         27, 29, 29, 37,   0,  0,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0,  0,   0, 36, 29, 29, 30,
@@ -336,7 +334,7 @@ int main() {
     };  
     
     FootballField field("../assets/Tilesheet/groundGrass.png", tileOrder, FIELD_X_TILES, FIELD_Y_TILES, TILESIZE);
-
+    
     gf::RoundedRectangleShape playButton({ 200.0f, 50.0f }, 10.0f);
     playButton.setPosition({ 300.0f, 325.0f });
     playButton.setColor(gf::Color::White);
@@ -368,32 +366,27 @@ int main() {
     
     backgroundSprite.setPosition({ (ScreenSize.x - textureSize.x * scale) / 2,
         (ScreenSize.y - textureSize.y * scale) / 2 });
+        
+        
+    // main loop
     
-
     while (window.isOpen()) {
         gf::Event event;
         while (window.pollEvent(event)) {
             actions.processEvent(event);
     
-            if (closeWindowAction.isActive()) {
-                window.close();
-            }
-    
-            if (fullscreenAction.isActive()) {
-                fullscreen = !fullscreen;
-                window.setFullscreen(fullscreen);
-            }
-    
             if (event.type == gf::EventType::MouseButtonPressed) {
                 gf::Vector2f mousePos = {static_cast<float>(event.mouseButton.coords.x),
                                          static_cast<float>(event.mouseButton.coords.y)};
     
-                if (isInside(playButton, mousePos)) {
-                    currState = GameState::PLAYING;
-                }
-    
-                if (isInside(quitButton, mousePos) && currState == GameState::START) {
-                    window.close();
+                if (currState == GameState::START) {
+                    if (isInside(playButton, mousePos)) {
+                        currState = GameState::PLAYING;
+                    }
+        
+                    if (isInside(quitButton, mousePos)) {
+                        window.close();
+                    }
                 }
             }
     
@@ -414,6 +407,22 @@ int main() {
                 }
             }            
         }
+
+        if (closeWindowAction.isActive()) {
+            window.close();
+        }
+
+        if (fullscreenAction.isActive()) {
+            window.toggleFullscreen();
+        }
+
+        if (pauseAction.isActive()) {
+            if (currState == GameState::PLAYING) {
+                currState = GameState::WAITING;
+            } else if (currState == GameState::WAITING) {
+                currState = GameState::PLAYING;
+            }
+        }
     
         if (currState == GameState::START) {
             renderer.clear();
@@ -423,8 +432,10 @@ int main() {
             renderer.draw(playText);
             renderer.draw(quitText);
             renderer.display();
+            dt = clock.restart();
+            actions.reset();
             continue;
-        } else {
+        } else if (currState == GameState::PLAYING) {
             velocity = {0.0f, 0.0f};
             if (leftAction.isActive()) {
                 velocity.x += -SPEED;
@@ -486,8 +497,11 @@ int main() {
                 }
             }
 
+            if (ball.getLockedTo()) {
+                ball.getLockedTo()->reduceSpeed();
+            }
+
             if (ball.isLockedTo(mainPlayer)) {
-                mainPlayer->reduceSpeed();
                 if (sprintAction.isActive()) {
                     ball.unlock();
                     ball.setVelocity(mainPlayer->getSelfPassVelocity());
@@ -496,7 +510,6 @@ int main() {
                     ball.unlock();
                     ball.setVelocity(mainPlayer->getPassVelocity(team.getPlayers()));
                 }
-
                 if (shootAction.isActive()) {
                     ball.unlock();
                     ball.setVelocity(mainPlayer->getShootVelocity(ball.getSize(), team.getPlayers()));
@@ -535,7 +548,7 @@ int main() {
 
             actions.reset();
 
-            gf::Time dt = clock.restart();
+            dt = clock.restart();
             mainPlayer->setVelocity(velocity);
 
             for (auto& [player, sprite] : playerSprites) {
@@ -605,6 +618,9 @@ int main() {
             renderer.draw(ballSprite);
 
             renderer.display();
+        }else {
+            dt = clock.restart();
+            actions.reset();
         }
     }
 

@@ -9,6 +9,7 @@ Ball::Ball(float size, gf::Vector2f position, gf::Color4f color)
 , m_lastTouchedBy(nullptr)
 , m_cooldown(0.0f)
 {
+    
 }
 
 gf::Vector2f Ball::getPosition() const {
@@ -125,8 +126,7 @@ int Ball::isOutOfField(int tileSize) {
 }
 
 bool Ball::isTouchingPlayer(const Player& player) const {
-    float distance = std::sqrt(std::pow(m_position.x - player.getPosition().x, 2) +
-                               std::pow(m_position.y - player.getPosition().y, 2));
+    float distance = gf::euclideanDistance(m_position, player.getPosition());
     return distance < (m_size + player.getSize()) / 2.0f;
 }
 

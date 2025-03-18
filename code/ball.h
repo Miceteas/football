@@ -27,7 +27,7 @@ class Ball : public gf::Entity {
     Ball(float size, gf::Vector2f position, gf::Color4f color);
 
     gf::Vector2f getPosition() const;
-    gf::Vector2f getVelocity() const; // Déplacé ici pour être public
+    gf::Vector2f getVelocity() const;
     float getSize() const;
 
     void setVelocity(gf::Vector2f velocity);

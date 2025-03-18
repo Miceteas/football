@@ -7,7 +7,7 @@ Team::Team(std::string name, gf::Color4f color)
 , m_left(true) 
 , m_goals(0)
 {
-
+    
 } 
 
 std::string Team::getName() {
@@ -107,8 +107,7 @@ Player* Team::getClosestPlayerToBall(const Ball& ball) {
     float minDistance = std::numeric_limits<float>::max();
 
     for (Player* player : m_players) {
-        float distance = std::sqrt(std::pow(player->getPosition().x - ball.getPosition().x, 2) +
-                                   std::pow(player->getPosition().y - ball.getPosition().y, 2));
+        float distance = gf::squareDistance(player->getPosition(), ball.getPosition());
 
         if (distance < minDistance) {
             minDistance = distance;

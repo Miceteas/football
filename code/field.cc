@@ -2,30 +2,27 @@
 
 FootballField::FootballField(const std::string& texturePath, const std::vector<int>& tileOrder, int tilesX, int tilesY, int displayTileSize)
 : m_texture(texturePath)
-, m_tileLayer(gf::TileLayer::createOrthogonal({ tilesX, tilesY }, { 64, 64 })) 
+, m_tileLayer(gf::TileLayer::createOrthogonal({ tilesX, tilesY }, { SPRITETILESIZE, SPRITETILESIZE })) 
 , m_tilesX(tilesX)
 , m_tilesY(tilesY)
 , m_displayTileSize(displayTileSize)
-, m_spriteTileSize(64) // Spritesheet tiles are always 64x64 pixels for us but if needed it can be added as a parameter!!! 
 {
     std::size_t tilesetId = m_tileLayer.createTilesetId();
     gf::Tileset& tileset = m_tileLayer.getTileset(tilesetId);
     tileset.setTexture(m_texture);
-    tileset.setTileSize({ m_spriteTileSize, m_spriteTileSize }); // Set the size of each tile in the spritesheet (64x64)
+    tileset.setTileSize({ SPRITETILESIZE, SPRITETILESIZE }); // Set the size of each tile in the spritesheet (64x64)
 
-    // To display in the correct order
     for (int y = 0; y < tilesY; ++y) {
         for (int x = 0; x < tilesX; ++x) {
             int index = y * tilesX + x;
             if (index < static_cast<int>(tileOrder.size())) {
-                int tileId = tileOrder[index]; // Tile index in the tileset
+                int tileId = tileOrder[index];
                 m_tileLayer.setTile({ x, y }, tilesetId, tileId);
             }
         }
     }
 
-    // Scale
-    float scaleFactor = static_cast<float>(displayTileSize) / m_spriteTileSize;
+    float scaleFactor = static_cast<float>(displayTileSize) / SPRITETILESIZE;
     m_tileLayer.setScale({ scaleFactor, scaleFactor });
 }
 

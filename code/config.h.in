@@ -3,4 +3,4 @@
 
 #define FOOTBALL_DATA_DIR "@FOOTBALL_DATA_DIR@"
 
-#endif // CONFIG_H
+#endif

@@ -21,5 +21,6 @@
 #define TILESIZE 128.0f
 #define BASECOOLDOWN 0.4f
 #define BASETIMEOFMINUTE 4.0f
+#define SPRITETILESIZE 64
 
 #endif

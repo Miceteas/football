@@ -41,7 +41,7 @@ void Player::setAim(std::vector<Player *> teamPlayersVec, bool left) {
 
     gf::Vector2f targetPosition;
 
-    float currMaxDist = FIELDXSIZE * FIELDXSIZE;
+    float currMaxDist = std::numeric_limits<float>::max();
     Role aimedRole;
 
     if (m_role != Role::ATTACKER) {
@@ -124,8 +124,7 @@ void Player::freeze(float duration) {
 
 // Good function only if both players are circles but we might change the shapes to be
 bool Player::collidesWith(const Player& other) const {
-    float distance = std::sqrt(std::pow(m_position.x - other.m_position.x, 2) +
-                               std::pow(m_position.y - other.m_position.y, 2));
+    float distance = gf::euclideanDistance(m_position, other.m_position);
     
     if (isTackling()) {
         return distance < (m_size + other.m_size);
@@ -137,8 +136,7 @@ bool Player::collidesWith(const Player& other) const {
 
 void Player::handleCollision(Player& other) {
     if (collidesWith(other)) {
-        float distance = std::sqrt(std::pow(m_position.x - other.m_position.x, 2) +
-                                   std::pow(m_position.y - other.m_position.y, 2));
+        float distance = gf::euclideanDistance(m_position, other.m_position);
 
         if (distance < (m_size + other.m_size) / 2.0f && !isTackling() && !other.isTackling()) {
             float overlap = (m_size + other.m_size) / 2.0f - distance;
@@ -220,8 +218,7 @@ gf::Vector2f Player::getPassVelocity(std::vector<Player *> players) {
     for (const auto& other : players) {
         if (this == other) continue;
 
-        float distance = std::sqrt(std::pow(m_position.x - other->m_position.x, 2) +
-                                   std::pow(m_position.y - other->m_position.y, 2));
+        float distance = gf::euclideanDistance(m_position, other->m_position);
 
         if (distance <= MAX_PASS_DISTANCE) {
             float angle = std::atan2(other->m_position.y - m_position.y, other->m_position.x - m_position.x);
@@ -257,9 +254,10 @@ gf::Vector2f Player::getShootVelocity(float ballSize, std::vector<Player *> team
         aimAssist = true;
     }
 
+    gf::Vector2f aimingPos(aimingX, aimingY);
+
     if (aimAssist) {
-        float distance = std::sqrt(std::pow(m_position.x - aimingX, 2) +
-                                   std::pow(m_position.y - aimingY, 2));
+        float distance = gf::euclideanDistance(m_position, aimingPos);
         if (distance < MAX_SHOOT_DISTANCE) {
             float angle = std::atan2(aimingY - m_position.y, aimingX - m_position.x);
             if (std::abs(angle - m_angle) < M_PI / 8 
