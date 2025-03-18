@@ -1,4 +1,5 @@
 #include "player.h"
+#include "ball.h"
 
 Player::Player(float stamina, float size, gf::Vector2f position, Role role, Side side, gf::Color4f color, float angle)
 : m_stamina(stamina)
@@ -399,10 +400,4 @@ void Player::AImove(Ball& ball, bool left, bool ballInTeam, std::vector<Player *
 void Player::moveTo(gf::Vector2f position) {
     m_position = position;
     m_velocity = {0.0f, 0.0f};
-}
-
-//TEMPORARY 
-
-void Player::changeColor(gf::Color4f color) {
-    m_color = color;
 }

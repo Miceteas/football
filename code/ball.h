@@ -6,7 +6,7 @@
 #include <gf/RenderTarget.h>
 #include <gf/Color.h>
 #include <gf/Shapes.h>
-#include "player.h"
+// #include "player.h"
 #include "config.h"
 #include "settings.h"
 

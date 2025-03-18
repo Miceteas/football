@@ -8,7 +8,6 @@
 #include <gf/Shapes.h>
 #include "role.h"
 #include "side.h"
-#include "ball.h"
 #include "settings.h"
 
 class Ball;
@@ -63,8 +62,6 @@ class Player : public gf::Entity {
     void reduceSpeed();
     void moveTo(gf::Vector2f position);
   
-    //TEMPORARY 
-    void changeColor(gf::Color4f color);
 };
 
 #endif

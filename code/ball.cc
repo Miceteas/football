@@ -1,4 +1,5 @@
 #include "ball.h"
+#include "player.h"
 
 Ball::Ball(float size, gf::Vector2f position, gf::Color4f color)
 : m_velocity({0, 0})
