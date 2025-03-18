@@ -9,7 +9,6 @@
 #include "role.h"
 #include "side.h"
 #include "ball.h"
-#include "config.h"
 #include "settings.h"
 
 class Ball;
@@ -46,7 +45,7 @@ class Player : public gf::Entity {
     void setPosition(gf::Vector2f position);
     void setVelocity(gf::Vector2f velocity);
     void update(float dt);
-    void render(gf::RenderTarget& target, bool isMainPlayer);
+    void renderMain(gf::RenderTarget& target);
     float getAngle();
     void setAngle(float angle);
     gf::Vector2f getSelfPassVelocity();

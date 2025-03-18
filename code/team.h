@@ -1,18 +1,17 @@
-#include <gf/Entity.h>
+#ifndef TEAM_H
+#define TEAM_H
+
 #include <gf/Vector.h>
-#include <gf/RenderTarget.h>
 #include <gf/Color.h>
-#include <gf/Shapes.h>
 #include <vector>
-#include <iosfwd>
-#include <iostream>
 #include "role.h"
 #include "side.h"
 
 #include "player.h"
 #include "ball.h"
-#include "config.h"
 #include "settings.h"
+
+#include <gf/RenderTarget.h>
 
 class Team {
     private:
@@ -29,9 +28,6 @@ class Team {
         std::string getName();
         gf::Color4f getColor();
         void changeSetup(int setup);
-        
-        void showActivePlayers(gf::RenderTarget& target); // idk... 
-        void showBenchPlayers(gf::RenderTarget& target);
 
         void setupSide(bool side);
         void addPlayer(Player *p);
@@ -47,3 +43,4 @@ class Team {
         int getGoals();
 };
 
+#endif

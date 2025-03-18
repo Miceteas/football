@@ -196,23 +196,12 @@ void Player::update(float dt) {
     }
 }
 
-void Player::render(gf::RenderTarget& target, bool isMainPlayer) {
-    gf::RectangleShape shape({m_size, m_size});
-    shape.setPosition(m_position);
-    shape.setAnchor(gf::Anchor::Center);
-    shape.setOutlineThickness(0.5f);
-    shape.setColor(m_color);
-    shape.setOutlineColor(gf::Color::darker(m_color));
-    shape.setRotation(m_angle);
-    target.draw(shape);
-
-    if (isMainPlayer) {
-        gf::RectangleShape square({m_size * 0.4f, m_size * 0.4f});
-        square.setPosition(m_position);
-        square.setAnchor(gf::Anchor::Center);
-        square.setColor(gf::Color::Green);
-        target.draw(square);
-    }
+void Player::renderMain(gf::RenderTarget& target) {
+    gf::RectangleShape square({m_size * 0.4f, m_size * 0.4f});
+    square.setPosition(m_position);
+    square.setAnchor(gf::Anchor::Center);
+    square.setColor(gf::Color::Green);
+    target.draw(square);
 }
 
 float Player::getAngle() {

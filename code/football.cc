@@ -4,21 +4,16 @@
 #include <string>
 #include <cmath>
 #include <vector>
-#include "classes.h"
+#include <random>
 #include <gf/Action.h>
 #include <gf/Clock.h>
 #include <gf/Color.h>
-#include <gf/EntityContainer.h>
 #include <gf/Event.h>
 #include <gf/Log.h>
 #include <gf/RenderWindow.h>
-#include <gf/ResourceManager.h>
-#include <gf/ViewContainer.h>
 #include <gf/Views.h>
 #include <gf/Window.h>
-#include <gf/Random.h>
 #include <gf/Shapes.h>
-#include <gf/Collision.h>
 #include <gf/Entity.h>
 #include <gf/SpriteBatch.h>
 #include <gf/Sprite.h>
@@ -34,10 +29,8 @@
 #include "settings.h"
 #include "ball.h"
 #include "player.h"
-#include "role.h"
 #include "team.h"
 #include "field.h"
-#include "minimap.h"
 
 enum class GameState {
     START,
@@ -49,7 +42,6 @@ enum class GameState {
 GameState currState = GameState::START;
 
 void touch(bool isTop, Team *teamHand, Team *teamRecieve, Ball *ball) {
-    //Do something for a touch
     gf::Vector2f posBall;
     gf::Vector2f posPlayer;
     float angle = 0;
@@ -60,7 +52,7 @@ void touch(bool isTop, Team *teamHand, Team *teamRecieve, Ball *ball) {
         posBall.y = 10;
         posPlayer.y = 0;
         angle = -M_PI / 2.0f;
-    }else {
+    } else {
         posBall.y = FIELDYSIZE - 10;
         posPlayer.y = FIELDYSIZE;
         angle = M_PI / 2.0f;
@@ -174,6 +166,7 @@ void endMatch(int playerGoals, int aiGoals) {
     } else {
         std::cout << "YOU WIN GOOD JOB !" << playerGoals << "-" << aiGoals << std::flush;
     }
+    currState = GameState::END;
 }
 
 bool isInside(const gf::RoundedRectangleShape& button, const gf::Vector2f& mousePos) {
@@ -188,13 +181,6 @@ int main() {
 
     gf::Log::setLevel(gf::Log::Info);
 
-    // setup resource directory
-    gf::ResourceManager resourceManager;
-    resourceManager.addSearchDir(FOOTBALL_DATA_DIR);
-    //resourceManager.addSearchDir("./assets");
-
-    gf::Random random;
-
     // initialize window
     gf::Window window("gf football", ScreenSize, ~gf::WindowHints::Resizable);
     window.setVerticalSyncEnabled(true);
@@ -202,11 +188,7 @@ int main() {
 
     gf::RenderWindow renderer(window);
 
-    // add cameras
-    gf::ViewContainer views;
     gf::ExtendView view({0.0f, 20.0f}, {float(window.getSize().x), float(window.getSize().y)});
-    views.addView(view);
-    views.setInitialFramebufferSize(window.getSize());
 
     // add actions
     gf::ActionContainer actions;
@@ -275,36 +257,35 @@ int main() {
     menu.addScancodeKeyControl(gf::Scancode::P); 
     actions.addAction(menu);
 
-    // add entities
-    gf::EntityContainer mainEntities;
-
     gf::Clock clock;
     bool fullscreen = false;
 
-    // Initialize a team with 11 players
+    float x = (13 % FIELD_X_TILES) * TILESIZE - TILESIZE/2; 
+    float y = (FIELD_Y_TILES*TILESIZE)/2;
+    Ball ball(TILESIZE/10, {x, y}, gf::Color::Rose);    
+
     Team team("Team A", gf::Color::Azure);
-    team.initPlayers();  // Initialize the players
+    team.initPlayers();
 
     Team team2("Team B", gf::Color::Chartreuse);
     team2.initPlayers();
     team2.setupSide(false);
 
-    // Texture players
-    /*gf::Texture texture("../assets/PNG/Blue/characterBlue(1).png") ;
+    std::vector<gf::Texture> teamTextures;
+    std::vector<gf::Texture> enemyTextures;
+    gf::Texture ballTexture("../assets/PNG/Equipment/ball_soccer2.png");
+    gf::Sprite ballSprite (ballTexture);
+    ballSprite.setAnchor(gf::Anchor::Center);
+    ballSprite.setScale({ball.getSize() / ballTexture.getSize().x, ball.getSize() / ballTexture.getSize().y});
+    srand(time(NULL));
 
-    gf::Sprite playerSprite;
-    playerSprite.setTexture(texture);*/
-
-    const std::string playerTexturesBasePath = "../assets/PNG/Blue/characterBlue (";
-    std::vector<gf::Texture> playerTextures;
-
-    for (int i = 1; i <= 10; ++i) {
-        gf::Texture texture(playerTexturesBasePath + std::to_string(i) + ").png");
-        playerTextures.push_back(std::move(texture));
+    for (int i = 1; i <= 11; ++i) {
+        int randN = (rand() % 5) + 1;
+        gf::Texture teamTexture("../assets/PNG/Blue/characterBlue (" + std::to_string(randN) + ").png");
+        teamTextures.push_back(std::move(teamTexture));
+        gf::Texture enemyTexture("../assets/PNG/Green/characterGreen (" + std::to_string(randN) + ").png");
+        enemyTextures.push_back(std::move(enemyTexture));
     }
-
-    gf::Texture playerTexture("../assets/PNG/Blue/characterBlue (1).png");
-    playerTextures.push_back(std::move(playerTexture));
 
     // default setup
     team.setupPlayers(1);
@@ -315,29 +296,19 @@ int main() {
 
     for (size_t i = 0; i < team.getPlayers().size(); ++i) {
         Player* player = team.getPlayers()[i];
-        gf::Sprite sprite(playerTextures[i]);
-        sprite.setScale({player->getSize()/ playerTextures[i].getSize().x, player->getSize() / playerTextures[i].getSize().y});
-        sprite.setPosition(player->getPosition());
-        sprite.setRotation(player->getAngle());
+        gf::Sprite sprite(teamTextures[i]);
+        sprite.setAnchor(gf::Anchor::Center);
+        sprite.setScale({player->getSize() / teamTextures[i].getSize().x, player->getSize() / teamTextures[i].getSize().y});
         playerSprites[player] = sprite;
     }
 
     for (size_t i = 0; i < team2.getPlayers().size(); ++i) {
         Player* player = team2.getPlayers()[i];
-        gf::Sprite sprite(playerTextures[i]);
-        sprite.setScale({player->getSize()/ playerTextures[i].getSize().x, player->getSize() / playerTextures[i].getSize().y});
-        sprite.setPosition(player->getPosition());
-        sprite.setRotation(player->getAngle());
+        gf::Sprite sprite(enemyTextures[i]);
+        sprite.setAnchor(gf::Anchor::Center);
+        sprite.setScale({player->getSize()/ enemyTextures[i].getSize().x, player->getSize() / enemyTextures[i].getSize().y});
         playerSprites2[player] = sprite;
-    }
-
-    // Add team players to the mainEntities
-    
-    
-    float x = (13 % FIELD_X_TILES) * TILESIZE - TILESIZE/2; 
-    float y = (FIELD_Y_TILES*TILESIZE)/2;
-    Ball ball(TILESIZE/10, {x, y}, gf::Color::Rose);
-    mainEntities.addEntity(ball);
+    }    
     
     gf::Vector2f velocity(0.0f, 0.0f);
 
@@ -349,42 +320,27 @@ int main() {
     // main loop
     
     std::vector<int> tileOrder = {
-        // Row 1
-        5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6,
-        // Row 2
-        14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17,
-        // Row 3
-        14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17,
-        // Row 4
-        27, 29, 29, 37, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 36, 29, 29, 30,
-        // Row 5
-        14, 0, 0, 17, 99, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 95, 14, 0, 0, 17,
-        // Row 6
-        14, 0, 0, 17, 112, 0, 0, 0, 0, 0, 0, 7, 46, 9, 0, 0, 0, 0, 0, 0, 108, 14, 0, 0, 17,
-        // Row 7
-        14, 0, 13, 17, 125, 0, 0, 0, 0, 0, 0, 20, 15, 22, 0, 0, 0, 0, 0, 0, 121, 14, 0, 13, 17,
-        // Row 8
-        14, 0, 0, 17, 138, 0, 0, 0, 0, 0, 0, 33, 48, 35, 0, 0, 0, 0, 0, 0, 134, 14, 0, 0, 17,
-        // Row 9
-        14, 0, 0, 17, 151, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 147, 14, 0, 0, 17,
-        // Row 10
-        27, 29, 29, 50, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 49, 29, 29, 30,
-        // Row 11
-        14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17,
-        // Row 12
-        14,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17,
-        // Row 13
-        18, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 42, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 19
+         5,  2,  2,  2,   2,  2,  2,  2,  2,  2,  2,  2,  3,  2,  2,  2,  2,  2,  2,  2,   2,  2,  2,  2,  6,
+        14,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0, 17,
+        14,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0, 17,
+        27, 29, 29, 37,   0,  0,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0,  0,   0, 36, 29, 29, 30,
+        14,  0,  0, 17,  99,  0,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0,  0,  95, 14,  0,  0, 17,
+        14,  0,  0, 17, 112,  0,  0,  0,  0,  0,  0,  7, 46,  9,  0,  0,  0,  0,  0,  0, 108, 14,  0,  0, 17,
+        14,  0, 13, 17, 125,  0,  0,  0,  0,  0,  0, 20, 15, 22,  0,  0,  0,  0,  0,  0, 121, 14,  0, 13, 17,
+        14,  0,  0, 17, 138,  0,  0,  0,  0,  0,  0, 33, 48, 35,  0,  0,  0,  0,  0,  0, 134, 14,  0,  0, 17,
+        14,  0,  0, 17, 151,  0,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0,  0, 147, 14,  0,  0, 17,
+        27, 29, 29, 50,   0,  0,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0,  0,   0, 49, 29, 29, 30,
+        14,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0, 17,
+        14,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0, 17,
+        18, 41, 41, 41,  41, 41, 41, 41, 41, 41, 41, 41, 42, 41, 41, 41, 41, 41, 41, 41,  41, 41, 41, 41, 19
     };  
     
     FootballField field("../assets/Tilesheet/groundGrass.png", tileOrder, FIELD_X_TILES, FIELD_Y_TILES, TILESIZE);
 
-    bool isInMenu = true;
-
-    gf::RoundedRectangleShape playButton({ 200.0f, 50.0f }, 10.0f); // Coins arrondis de 10px
+    gf::RoundedRectangleShape playButton({ 200.0f, 50.0f }, 10.0f);
     playButton.setPosition({ 300.0f, 325.0f });
     playButton.setColor(gf::Color::White);
-    playButton.setOutlineThickness(3.0f); // Contour noir pour améliorer la visibilité
+    playButton.setOutlineThickness(3.0f);
     playButton.setOutlineColor(gf::Color::Black);
     
     gf::RoundedRectangleShape quitButton({ 200.0f, 50.0f }, 10.0f);
@@ -418,7 +374,6 @@ int main() {
         gf::Event event;
         while (window.pollEvent(event)) {
             actions.processEvent(event);
-            views.processEvent(event);
     
             if (closeWindowAction.isActive()) {
                 window.close();
@@ -434,10 +389,10 @@ int main() {
                                          static_cast<float>(event.mouseButton.coords.y)};
     
                 if (isInside(playButton, mousePos)) {
-                    isInMenu = false;
+                    currState = GameState::PLAYING;
                 }
     
-                if (isInside(quitButton, mousePos) && isInMenu == true) {
+                if (isInside(quitButton, mousePos) && currState == GameState::START) {
                     window.close();
                 }
             }
@@ -460,7 +415,7 @@ int main() {
             }            
         }
     
-        if (isInMenu) {
+        if (currState == GameState::START) {
             renderer.clear();
             renderer.draw(backgroundSprite); 
             renderer.draw(playButton);
@@ -593,8 +548,7 @@ int main() {
                 sprite.setRotation(player->getAngle());
             }
 
-            gf::Vector2f mainPlayerPosition = mainPlayer->getPosition();
-            gf::Vector2f ballPosition = ball.getPosition();
+            ballSprite.setPosition(ball.getPosition());
 
             if (ball.isLockedTo(mainPlayer)) {
                 ball.setVelocity(velocity);
@@ -602,7 +556,7 @@ int main() {
                 ball.setVelocity(ball.getVelocity());
             }
 
-            // team.moveTeam(ball, mainPlayer);
+            team.moveTeam(ball, mainPlayer);
             team2.moveTeam(ball, mainPlayer);
 
             ball.update(dt.asSeconds());
@@ -613,7 +567,7 @@ int main() {
 
             checkOut(out, team.getPlayers(), ball.getLastTouchedBy(), &team, &team2, &ball);
 
-            if (ball.isLockedTo(mainPlayer) || ball.getLastTouchedBy() == nullptr) {
+            if (ball.isLockedTo(mainPlayer) || !ball.getLastTouchedBy()) {
                 view.setCenter(mainPlayer->getPosition());
             }else {
                 view.setCenter(ball.getPosition());
@@ -631,39 +585,25 @@ int main() {
                     endMatch(team.getGoals(), team2.getGoals());
                 }
             }
-
-            //Minimap minimap(field, 0.2f); // 0.2f is the scale for the minimap
-            //minimap.setPosition(10.0f, 10.0f); // Position in the top-left corner
             
             // Main loop (rendering section)
             renderer.clear();
 
-            // Set the main view for the field and game entities
             renderer.setView(view);
 
-            // Render the field
             renderer.draw(field.getTileLayer(), gf::RenderStates());
 
-            // Render the players
             for (auto& [player, sprite] : playerSprites) {
-                player->render(renderer, player == mainPlayer);
+                renderer.draw(sprite);
+                if (player == mainPlayer) player->renderMain(renderer);
             }
 
             for (auto& [player, sprite] : playerSprites2) {
-                player->render(renderer, false);
+                renderer.draw(sprite);
             }
 
-            // Render the ball
-            ball.render(renderer);
+            renderer.draw(ballSprite);
 
-
-            // Render the minimap
-            //minimap.render(renderer);
-
-            // Return to the main game view
-            renderer.setView(view);
-
-            // Display everything
             renderer.display();
         }
     }

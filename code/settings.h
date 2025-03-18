@@ -22,4 +22,4 @@
 #define BASECOOLDOWN 0.4f
 #define BASETIMEOFMINUTE 4.0f
 
-#endif //SETTINGS_H
+#endif

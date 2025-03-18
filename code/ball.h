@@ -35,7 +35,6 @@ class Ball : public gf::Entity {
     void lockTo(Player *p);
     void unlock();
     bool isLockedTo(Player *p) const;
-    void render(gf::RenderTarget& target);
     int isOutOfField(int tileSize);
     Player *getLastTouchedBy();
     Player *getLockedTo();

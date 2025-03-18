@@ -77,16 +77,6 @@ gf::Vector2f Ball::getVelocity() const {
     return m_velocity;
 }
 
-void Ball::render(gf::RenderTarget& target) {
-    gf::CircleShape shape(m_size);
-    shape.setPosition(m_position);
-    shape.setColor(m_color);
-    shape.setAnchor(gf::Anchor::Center);
-    shape.setOutlineThickness(0.5f);
-    shape.setOutlineColor(gf::Color::lighter(m_color));
-    target.draw(shape);
-}
-
 Player *Ball::getLastTouchedBy() {
     return m_lastTouchedBy;
 }

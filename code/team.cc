@@ -42,20 +42,8 @@ void Team::setupSide(bool side){
     m_left = side;
 }
 
-void Team::showActivePlayers(gf::RenderTarget& target) {
-    for (Player *p : m_players) {
-        p->render(target,false); 
-    }
-}
-
 std::vector<Player*> Team::getPlayers(){
     return m_players;
-}
-
-void Team::showBenchPlayers(gf::RenderTarget& target) {
-    for (Player *p : m_bench) {
-        p->render(target,false);
-    }
 }
 
 void Team::initPlayers() {
@@ -112,43 +100,6 @@ void Team::setupPlayers(int style) {
     m_players[8]->setPosition({attackX, yOffset - playerSpacingY});
     m_players[9]->setPosition({attackX, yOffset});
     m_players[10]->setPosition({attackX, yOffset + playerSpacingY});
-
-    
-    /*
-    TO REMOVE BEFORE THE END 
-    */
-
-    if (m_left) {
-        m_players[0]->changeColor(gf::Color::Blue);
-
-        m_players[1]->changeColor(gf::Color::Azure);
-        m_players[2]->changeColor(gf::Color::Azure);
-        m_players[3]->changeColor(gf::Color::Azure);
-        m_players[4]->changeColor(gf::Color::Azure);
-
-        m_players[5]->changeColor(gf::Color::Cyan);
-        m_players[6]->changeColor(gf::Color::Cyan);
-        m_players[7]->changeColor(gf::Color::Cyan);
-
-        m_players[8]->changeColor(gf::Color::Spring);
-        m_players[9]->changeColor(gf::Color::Spring);
-        m_players[10]->changeColor(gf::Color::Spring);
-    } else {
-        m_players[0]->changeColor(gf::Color::Red);
-
-        m_players[1]->changeColor(gf::Color::Orange);
-        m_players[2]->changeColor(gf::Color::Orange);
-        m_players[3]->changeColor(gf::Color::Orange);
-        m_players[4]->changeColor(gf::Color::Orange);
-
-        m_players[5]->changeColor(gf::Color::Rose);
-        m_players[6]->changeColor(gf::Color::Rose);
-        m_players[7]->changeColor(gf::Color::Rose);
-
-        m_players[8]->changeColor(gf::Color::Yellow);
-        m_players[9]->changeColor(gf::Color::Yellow);
-        m_players[10]->changeColor(gf::Color::Yellow);
-    }
 }
 
 Player* Team::getClosestPlayerToBall(const Ball& ball) {

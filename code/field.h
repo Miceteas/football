@@ -5,8 +5,6 @@
 #include <gf/Tileset.h>
 #include <gf/Texture.h>
 #include <vector>
-#include <string>
-#include "settings.h"
 
 class FootballField {
     public:
