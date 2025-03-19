@@ -176,6 +176,17 @@ bool isInside(const gf::RoundedRectangleShape& button, const gf::Vector2f& mouse
             mousePos.y >= pos.y && mousePos.y <= pos.y + size.y);
 }
 
+bool isTooFarFromBall(const Player& player, const Ball& ball, float maxDistance) {
+    gf::Vector2f playerPos = player.getPosition();
+    gf::Vector2f ballPos = ball.getPosition();
+    
+    float dx = playerPos.x - ballPos.x;
+    float dy = playerPos.y - ballPos.y;
+    float distance = std::sqrt(dx * dx + dy * dy);
+    
+    return distance > maxDistance;
+}
+
 int main() {
     static constexpr gf::Vector2u ScreenSize(800, 800);
 
@@ -375,6 +386,8 @@ int main() {
     
     backgroundSprite.setPosition({ (ScreenSize.x - textureSize.x * scale) / 2,
         (ScreenSize.y - textureSize.y * scale) / 2 });
+
+    const float MAX_DISTANCE_FROM_BALL = 300.0f;
         
         
     // main loop
@@ -553,6 +566,10 @@ int main() {
                 if (closestPlayer) {
                     mainPlayer = closestPlayer;
                 }
+            }
+    
+            if (isTooFarFromBall(*mainPlayer, ball, MAX_DISTANCE_FROM_BALL)) {
+                mainPlayer = team.getClosestPlayerToBall(ball);
             }
 
             actions.reset();
